@@ -418,4 +418,9 @@ class Bundler:
             self.path_stack.remove(path)
 
     def get(self) -> bytes:
-        return b''.join(self.result_lines)
+        filtered = []
+        for line in self.result_lines:
+            if (line.startswith(b'#line ')):
+                filtered.append(line)
+        return b''.join(filtered)
+        # return b''.join(self.result_lines)
