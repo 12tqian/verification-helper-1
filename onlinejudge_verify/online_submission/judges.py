@@ -91,20 +91,22 @@ class VJudge:
         # Logging in
         driver = webdriver.Chrome()
         driver.get(self.JUDGE_URL)
-        WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[8]/a"))).click()
-        WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[1]/input"))).send_keys(self.username)
-        WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[2]/input"))).send_keys(self.password)
-        WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[3]/button[3]"))).click()
+        TIMEOUT = 20
+        WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[8]/a"))).click()
+        WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[1]/input"))).send_keys(self.username)
+        WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[2]/input"))).send_keys(self.password)
+        WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[3]/button[3]"))).click()
         judge_name, submission_url = self.get_vjudge_problem_link(problem_link)
+        # Submitting Solution
         driver.get(submission_url)
-        WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[1]/div[1]/button"))).click()
-        select = Select(WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div/select"))))
+        WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[1]/div[1]/button"))).click()
+        select = Select(WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div/select"))))
         select.select_by_value(self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language])
-        WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[6]/div/textarea"))).send_keys(solution.solution_code + "\n// " + str(self.current_millisecond_time()))
-        WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]"))).click()
+        WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[6]/div/textarea"))).send_keys(solution.solution_code + "\n// " + str(self.current_millisecond_time()))
+        WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]"))).click()
         start = time.time()
         while True: 
-            text = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div[2]/div[1]/table/tbody/tr[1]/td"))).text
+            text = WebDriverWait(driver, TIMEOUT).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div[2]/div[1]/table/tbody/tr[1]/td"))).text
             text = text.split(' ')[0]
             if text in self.GOOD_VERDICTS:
                 driver.quit()
