@@ -58,6 +58,7 @@ def initialize_judges():
         username = os.environ.get('OJ_USERNAME')
         password = os.environ.get('OJ_PASSWORD')
         judges['codeforces.com'] = Codeforces(username, password)
+        judges['vjudge.net'] = VJudge(username, password)
     else:
         logger.warning("The online judge account does not exist.")
 
@@ -94,7 +95,11 @@ def verify_file(path: pathlib.Path, *, compilers: List[str], tle: float, jobs: i
             code = language.bundle(path, basedir=basedir, options={'include_paths': [basedir]}).decode()
             solution = Solution('C++', code)
             lst = url.split('/')
-            problem = Problem('codeforces', lst[-3] + lst[-1])
+            problem = ''
+            if lst[-2] == 'problem':
+                problem = Problem('codeforces', lst[-3] + lst[-1])
+            else:
+                problem = Problem('codeforces', lst[-2] + lst[-1])
             return judge.submit_solution(problem, solution)
 
     problem = onlinejudge.dispatch.problem_from_url(url)
