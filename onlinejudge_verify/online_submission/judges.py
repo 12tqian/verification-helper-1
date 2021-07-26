@@ -117,7 +117,11 @@ class Codeforces:
             if (time.time() - start >= 60):
                 break
             response = requests.get("https://codeforces.com/api/user.status?handle=" + self.username + "&from=1&count=1")
-            data = json.loads(response.content.decode('utf-8'))
+            try: 
+                data = json.loads(response.content.decode('utf-8'))
+            except:
+                time.sleep(0.5)
+                continue
             
             data = data['result'][0]
 
