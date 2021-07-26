@@ -58,6 +58,8 @@ def initialize_judges():
         username = os.environ.get('OJ_USERNAME')
         password = os.environ.get('OJ_PASSWORD')
         judges['codeforces.com'] = Codeforces(username, password)
+    else:
+        logger.warning("The online judge account does not exist.")
 
 def verify_file(path: pathlib.Path, *, compilers: List[str], tle: float, jobs: int) -> Optional[bool]:
     logger.info('verify: %s', path)
