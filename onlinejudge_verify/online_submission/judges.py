@@ -91,7 +91,7 @@ class VJudge:
         # Logging in
         driver = webdriver.Chrome()
         driver.get(self.JUDGE_URL)
-        TIMEOUT = 20
+        TIMEOUT = 30
         WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[8]/a"))).click()
         WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[1]/input"))).send_keys(self.username)
         WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[2]/input"))).send_keys(self.password)
