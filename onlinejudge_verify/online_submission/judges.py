@@ -104,6 +104,7 @@ class VJudge:
         select = Select(wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div/select"))))
         select.select_by_value(self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language])
         wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[6]/div/textarea"))).send_keys(solution.solution_code + "\n// " + str(self.current_millisecond_time()))
+        time.sleep(10)
         wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]"))).click()
         time.sleep(10)
         start = time.time()
