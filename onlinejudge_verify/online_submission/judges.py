@@ -70,8 +70,10 @@ class VJudge:
         self.password = password
         self.logged_in = False
         self.driver = webdriver.Chrome()
+        self.driver.quit()
 
     def login(self):
+        self.driver = webdriver.Chrome()
         self.driver.get(self.JUDGE_URL)
         WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[8]/a"))).click()
         WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[1]/input"))).send_keys(self.username)
