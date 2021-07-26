@@ -21,7 +21,8 @@ from onlinejudge_verify.languages.cplusplus_bundle import BundleError
 
 logger = getLogger(__name__)
 
-judges = {}
+# judges = {}
+vjudge = {}
 
 class VerificationSummary:
     def __init__(self, *, failed_test_paths: List[pathlib.Path]):
@@ -57,8 +58,8 @@ def initialize_judges():
     if (os.environ.get('OJ_USERNAME') and os.environ.get('OJ_PASSWORD')):
         username = os.environ.get('OJ_USERNAME')
         password = os.environ.get('OJ_PASSWORD')
-        judges['codeforces.com'] = Codeforces(username, password)
-        judges['vjudge.net'] = VJudge(username, password)
+        # judges['codeforces.com'] = Codeforces(username, password)
+        vjudge = VJudge(username, password)
     else:
         logger.warning("The online judge account does not exist.")
 
@@ -86,21 +87,29 @@ def verify_file(path: pathlib.Path, *, compilers: List[str], tle: float, jobs: i
 
     logger.info('problem: %s', url)
 
-    # For now, we only care about C++
-    for key in judges.keys():
-        if key in url:
-            judge = judges[key]
-            f = open(path)
-            basedir = pathlib.Path.cwd()
-            code = language.bundle(path, basedir=basedir, options={'include_paths': [basedir]}).decode()
-            solution = Solution('C++', code)
-            lst = url.split('/')
-            problem = ''
-            if lst[-2] == 'problem':
-                problem = Problem('codeforces', lst[-3] + lst[-1])
-            else:
-                problem = Problem('codeforces', lst[-2] + lst[-1])
-            return judge.submit_solution(problem, solution)
+    # Below is the support for Codeforces Submissions, but I will switch to pure vjudge
+    # For now, we only care about C++    
+    # for key in judges.keys():
+    #     if key in url:
+    #         judge = judges[key]
+    #         f = open(path)
+    #         basedir = pathlib.Path.cwd()
+    #         code = language.bundle(path, basedir=basedir, options={'include_paths': [basedir]}).decode()
+    #         solution = Solution('C++', code)
+    #         lst = url.split('/')
+    #         problem = ''
+    #         if lst[-2] == 'problem':
+    #             problem = Problem('codeforces', lst[-3] + lst[-1])
+    #         else:
+    #             problem = Problem('codeforces', lst[-2] + lst[-1])
+    #         return judge.submit_solution(problem, solution)
+    
+    link = vjudge.get_vjudge_problem_link(url)
+    if link != None:
+        basedir = pathlib.Path.cwd()
+        code = language.bundle(path, basedir=basedir, options={'include_paths': [basedir]}).decode()
+        solution = Solution('C++', code)
+        return vjudge.submit_solution(link, solution)
 
     problem = onlinejudge.dispatch.problem_from_url(url)
 
