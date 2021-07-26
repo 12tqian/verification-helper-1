@@ -8,6 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
 
 import time
 import json
@@ -92,26 +93,60 @@ class VJudge:
         # Logging in
         
         options = Options()
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')  # Last I checked this was necessary.
+        # options.add_argument('--headless')
+        # options.add_argument('--disable-gpu')  # Last I checked this was necessary.
         driver = webdriver.Chrome(chrome_options=options)
         driver.get(self.JUDGE_URL)
         wait = WebDriverWait(driver, 10)
-        wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[8]/a"))).click()
-        wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[1]/input"))).send_keys(self.username)
-        wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[2]/input"))).send_keys(self.password)
-        wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[3]/button[3]"))).click()
+
+        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[8]/a")))
+        driver.execute_script("arguments[0].click();", element)
+
+        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[1]/input")))
+        driver.execute_script("arguments[0].value = arguments[1];", element, self.username)
+
+        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[2]/input")))
+        driver.execute_script("arguments[0].value = arguments[1];", element, self.password)
+
+        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[3]/button[3]")))
+        driver.execute_script("arguments[0].click();", element)
+
         judge_name, submission_url = self.get_vjudge_problem_link(problem_link)
+
         # Submitting Solution
         driver.get(submission_url)
-        wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[1]/div[1]/button"))).click()
-        select = Select(wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div/select"))))
-        select.select_by_value(self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language])
-        wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[6]/div/textarea"))).send_keys(solution.solution_code + "\n// " + str(self.current_millisecond_time()))
-        wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]"))).click()
+        
+        # click submit button
+        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[1]/div[1]/button")))
+        driver.execute_script("arguments[0].click();", element)
+
+        # select language
+        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div/select")))  
+        value = self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language]
+        driver.execute_script('''
+                                var select = arguments[0]; 
+                                for (var i = 0; i < select.options.length; i++) { 
+                                    if (select.options[i].value == arguments[1]) { 
+                                        select.options[i].selected = true; 
+                                    } 
+                                }''', element, value);
+
+        # insert code
+        new_code = solution.solution_code + "\n// " + str(self.current_millisecond_time())
+        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[6]/div/textarea")))
+        driver.execute_script("arguments[0].value = arguments[1];", element, new_code)
+
+        # click submit
+        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]")))
+        driver.execute_script("arguments[0].click();", element)
+        
         start = time.time()
+        # repeat check for result
         while True: 
-            text = wait.until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div[2]/div[1]/table/tbody/tr[1]/td"))).text
+            try:
+                text = wait.until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div[2]/div[1]/table/tbody/tr[1]/td"))).text
+            except:
+                text = ''
             text = text.split(' ')[0]
             if text in self.GOOD_VERDICTS:
                 driver.quit()
