@@ -17,7 +17,7 @@ setup(
         'setuptools',
         'toml',
         'importlab',
-        'mechanics',
+        'mechanize',
     ],
     packages=find_packages(exclude=('tests', 'docs')),
     package_data={
