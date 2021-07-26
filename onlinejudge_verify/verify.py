@@ -22,7 +22,7 @@ from onlinejudge_verify.languages.cplusplus_bundle import BundleError
 logger = getLogger(__name__)
 
 # judges = {}
-vjudge = {}
+vjudge = VJudge("", "")
 
 class VerificationSummary:
     def __init__(self, *, failed_test_paths: List[pathlib.Path]):
@@ -103,7 +103,7 @@ def verify_file(path: pathlib.Path, *, compilers: List[str], tle: float, jobs: i
     #         else:
     #             problem = Problem('codeforces', lst[-2] + lst[-1])
     #         return judge.submit_solution(problem, solution)
-    
+
     link = vjudge.get_vjudge_problem_link(url)
     if link != None:
         basedir = pathlib.Path.cwd()
