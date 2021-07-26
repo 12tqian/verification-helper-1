@@ -54,9 +54,6 @@ def exec_command(command: List[str]):
             os.chdir(str(cwd))
 
 def initialize_judges():
-    username = 'vhelperoj'
-    password = 'verificationpassword'
-    judges['codeforces.com'] = Codeforces(username, password)
     if (os.environ.get('OJ_USERNAME') and os.environ.get('OJ_PASSWORD')):
         username = os.environ.get('OJ_USERNAME')
         password = os.environ.get('OJ_PASSWORD')
