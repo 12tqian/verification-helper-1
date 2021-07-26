@@ -115,7 +115,7 @@ class VJudge:
             elif text in self.BAD_VERDICTS:
                 driver.quit()
                 return False
-            time.sleep(0.25)
+            driver.implicitly_wait(0.25)
             if time.time() - start>= 60:
                 break
         driver.quit()
