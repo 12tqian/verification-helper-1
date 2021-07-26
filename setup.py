@@ -17,6 +17,7 @@ setup(
         'setuptools',
         'toml',
         'importlab',
+        'mechanics',
     ],
     packages=find_packages(exclude=('tests', 'docs')),
     package_data={
