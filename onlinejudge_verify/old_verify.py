@@ -13,15 +13,8 @@ import onlinejudge
 import onlinejudge_verify.languages.list
 import onlinejudge_verify.marker
 
-from onlinejudge_verify.online_submission.judges import *
-from onlinejudge_verify.online_submission.submissions import *
-
-import onlinejudge_verify.languages.cplusplus_bundle as cplusplus_bundle
-from onlinejudge_verify.languages.cplusplus_bundle import BundleError
-
 logger = getLogger(__name__)
 
-judges = {}
 
 class VerificationSummary:
     def __init__(self, *, failed_test_paths: List[pathlib.Path]):
@@ -53,14 +46,6 @@ def exec_command(command: List[str]):
         if pathlib.Path.cwd() != cwd:
             os.chdir(str(cwd))
 
-def initialize_judges():
-    username = 'vhelperoj'
-    password = 'verificationpassword'
-    judges['codeforces.com'] = Codeforces(username, password)
-    if (os.environ.get('OJ_USERNAME') and os.environ.get('OJ_PASSWORD')):
-        username = os.environ.get('OJ_USERNAME')
-        password = os.environ.get('OJ_PASSWORD')
-        judges['codeforces.com'] = Codeforces(username, password)
 
 def verify_file(path: pathlib.Path, *, compilers: List[str], tle: float, jobs: int) -> Optional[bool]:
     logger.info('verify: %s', path)
@@ -69,6 +54,7 @@ def verify_file(path: pathlib.Path, *, compilers: List[str], tle: float, jobs: i
     if language is None:
         logger.error('unsupported language')
         return False
+
     # analyze attributes
     try:
         attributes = language.list_attributes(path, basedir=pathlib.Path.cwd())
@@ -83,23 +69,8 @@ def verify_file(path: pathlib.Path, *, compilers: List[str], tle: float, jobs: i
         logger.error('PROBLEM is not specified')
         return False
     url = attributes['PROBLEM']
-
-    logger.info('problem: %s', url)
-
-    # For now, we only care about C++
-    for key in judges.keys():
-        if key in url:
-            judge = judges[key]
-            f = open(path)
-            basedir = pathlib.Path.cwd()
-            code = language.bundle(path, basedir=basedir, options={'include_paths': [basedir]}).decode()
-            solution = Solution('C++', code)
-            lst = url.split('/')
-            problem = Problem('codeforces', lst[-3] + lst[-1])
-            return judge.submit_solution(problem, solution)
-    return True
-
     problem = onlinejudge.dispatch.problem_from_url(url)
+    logger.info('problem: %s', url)
 
     # download test cases
     directory = pathlib.Path('.verify-helper/cache') / hashlib.md5(url.encode()).hexdigest()
@@ -145,6 +116,7 @@ def verify_file(path: pathlib.Path, *, compilers: List[str], tle: float, jobs: i
 
     return True
 
+
 def main(paths: List[pathlib.Path], *, marker: onlinejudge_verify.marker.VerificationMarker, timeout: float = math.inf, tle: float = 60, jobs: int = 1) -> VerificationSummary:
     try:
         import resource  # pylint: disable=import-outside-toplevel
@@ -163,13 +135,8 @@ def main(paths: List[pathlib.Path], *, marker: onlinejudge_verify.marker.Verific
 
     failed_test_paths: List[pathlib.Path] = []
 
-    initialize_judges()
-
     start = time.time()
-
     for path in paths:
-        # Used to parse for online submission
-        
         if marker.is_verified(path):
             continue
 
