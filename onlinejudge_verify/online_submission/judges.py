@@ -105,8 +105,8 @@ class VJudge:
         select.select_by_value(self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language])
         wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[6]/div/textarea"))).send_keys(solution.solution_code + "\n// " + str(self.current_millisecond_time()))
         wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]"))).click()
+        time.sleep(5)
         start = time.time()
-        time.sleep(2)
         while True: 
             text = wait.until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div[2]/div[1]/table/tbody/tr[1]/td"))).text
             text = text.split(' ')[0]
