@@ -111,7 +111,7 @@ def verify_file(path: pathlib.Path, *, compilers: List[str], tle: float, jobs: i
         basedir = pathlib.Path.cwd()
         code = language.bundle(path, basedir=basedir, options={'include_paths': [basedir]}).decode()
         solution = Solution('C++', code)
-        return vjudge.submit_solution(link, solution)
+        return vjudge.submit_solution(url, solution)
 
     problem = onlinejudge.dispatch.problem_from_url(url)
 
