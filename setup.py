@@ -18,6 +18,7 @@ setup(
         'toml',
         'importlab',
         'mechanize',
+        'selenium',
     ],
     packages=find_packages(exclude=('tests', 'docs')),
     package_data={

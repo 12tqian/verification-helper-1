@@ -2,9 +2,125 @@ from onlinejudge_verify.online_submission.submissions import *
 from requests import session
 import requests
 import mechanize
+from selenium import webdriver
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+
 import time
 import json
 import traceback
+
+class VJudge:
+    JUDGE_NAME = "vjudge"
+    JUDGE_URL = "https://vjudge.net/"
+    PROBLEM_URL = "https://vjudge.net/problem/"
+    GOOD_VERDICTS = ["Accepted"]
+    BAD_VERDICTS = ["Time", "Wrong", "Compilation", "Runtime", "Memory", "Output", "Presentation", "Compile", "Unknown"]
+
+    LANGUAGES = {
+        "C" : "43", #GNU GCC C11 5.1.0
+        "java" : "36", # Java 1.8.0_241
+        "cpp" : "61", # 
+        "C++" : "C++", # C++ 17 64 bit
+        "py" : "41" #PyPy 3.6 (7.2.0)
+    }
+
+    JUDGE_PREFIX = {
+        "codeforces" : "CodeForces",
+        "atcoder" : "AtCoder",
+        "spoj" : "SPOJ",
+        "kattis" : "Kattis"
+    }
+
+    JUDGE_MARKER = {
+        "codeforces.com" : "codeforces",
+        "atcoder.jp" : "atcoder",
+        "spoj.com" : "spoj",
+        "open.kattis.com" : "kattis"
+    }
+
+    JUDGE_LANGUAGE_VALUE = {
+        'codeforces' : {
+            'C++' : '61'
+        },
+        'atcoder' : {
+            'C++' : '4003'
+        },
+        'kattis' : {
+            'C++' : 'C++'
+        },
+        'spoj' : {
+            'C++' : '44'
+        }
+    }
+
+    username: str
+    password: str
+    logged_in: bool
+
+    driver: webdriver.Chrome
+
+    def current_millisecond_time(self):
+        return round(time.time() * 1000)
+
+    def __init__(self, username = "", password = ""):
+        self.username = username
+        self.password = password
+        self.logged_in = False
+        self.driver = webdriver.Chrome()
+
+    def login(self):
+        self.driver.get(self.JUDGE_URL)
+        WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[8]/a"))).click()
+        WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[1]/input"))).send_keys(self.username)
+        WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[2]/input"))).send_keys(self.password)
+        WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[3]/button[3]"))).click()
+
+    def get_vjudge_problem_link(self, problem_link):
+        judge_name = ''
+        for marker in self.JUDGE_MARKER.keys():
+            if marker in problem_link:
+                judge_name = self.JUDGE_MARKER[marker]
+                break
+        if judge_name == '':
+            return None
+        add = ''
+        if judge_name == 'codeforces':
+            lst = problem_link.split('/')
+            if lst[-2] == 'problem':
+                add = lst[-3] + lst[-1];
+            else:
+                add = lst[-2] + lst[-1]
+        elif judge_name == 'atcoder' or judge_name == 'spoj' or judge_name == 'kattis':
+            add = problem_link.split('/')[-1]
+        if (judge_name == 'atcoder'):
+            add = add.split('?')[0] # get rid of language extension
+        return [judge_name, self.PROBLEM_URL + self.JUDGE_PREFIX[judge_name] + '-' + add]
+
+    def submit_solution(self, problem_link, solution): 
+        if not self.logged_in:
+            self.login()
+        judge_name, submission_url = self.get_vjudge_problem_link(problem_link)
+        self.driver.get(submission_url)
+        WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[1]/div[1]/button"))).click()
+        select = Select(WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div/select"))))
+        select.select_by_value(self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language])
+        WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[6]/div/textarea"))).send_keys(solution.solution_code + "\n// " + str(self.current_millisecond_time()))
+        WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]"))).click()
+        start = time.time()
+        while True: 
+            text = WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div[2]/div[1]/table/tbody/tr[1]/td"))).text
+            text = text.split(' ')[0]
+            if text in self.GOOD_VERDICTS:
+                return True
+            elif text in self.BAD_VERDICTS:
+                return False
+            time.sleep(0.25)
+            if time.time() - start>= 60:
+                break
+        return False
 
 class Codeforces:
     JUDGE_NAME = "codeforces"
@@ -40,7 +156,7 @@ class Codeforces:
         self.br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time = 1)
 
         self.br.addheaders = [('User-agent', 'Chrome')]
-        
+
     def login(self):
         # print("Trying to log into CodeForces: " + self.username)
         # The site we will navigate into, handling it's session
@@ -132,7 +248,7 @@ class Codeforces:
                 verdict = str(data['verdict'])
             except:
                 traceback.print_exc()
-                print(data)
+                # print(data)
                 return False
 
             if verdict == "TESTING":
