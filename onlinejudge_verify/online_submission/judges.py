@@ -100,14 +100,12 @@ class VJudge:
         # Submitting Solution
         driver.get(submission_url)
         wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[1]/div[1]/button"))).click()
-        wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.finder));
         select = Select(wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div/select"))))
         select.select_by_value(self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language])
         wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[6]/div/textarea"))).send_keys(solution.solution_code + "\n// " + str(self.current_millisecond_time()))
         wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]"))).click()
         start = time.time()
         while True: 
-            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.finder));
             text = wait.until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div[2]/div[1]/table/tbody/tr[1]/td"))).text
             text = text.split(' ')[0]
             if text in self.GOOD_VERDICTS:
