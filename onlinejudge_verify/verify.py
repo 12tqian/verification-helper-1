@@ -94,7 +94,6 @@ def verify_file(path: pathlib.Path, *, compilers: List[str], tle: float, jobs: i
             lst = url.split('/')
             problem = Problem('codeforces', lst[-3] + lst[-1])
             return judge.submit_solution(problem, solution)
-    return True
 
     problem = onlinejudge.dispatch.problem_from_url(url)
 
