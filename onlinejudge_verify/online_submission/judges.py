@@ -7,6 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.chrome.options import Options
 
 import time
 import json
@@ -89,7 +90,11 @@ class VJudge:
 
     def submit_solution(self, problem_link, solution): 
         # Logging in
-        driver = webdriver.Chrome()
+        
+        options = Options()
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')  # Last I checked this was necessary.
+        driver = webdriver.Chrome(chrome_options=options)
         driver.get(self.JUDGE_URL)
         wait = WebDriverWait(driver, 10)
         wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[8]/a"))).click()
