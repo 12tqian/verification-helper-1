@@ -55,6 +55,7 @@ def exec_command(command: List[str]):
             os.chdir(str(cwd))
 
 def initialize_judges():
+    global vjudge
     if (os.environ.get('OJ_USERNAME') and os.environ.get('OJ_PASSWORD')):
         username = os.environ.get('OJ_USERNAME')
         password = os.environ.get('OJ_PASSWORD')
@@ -64,6 +65,7 @@ def initialize_judges():
         logger.warning("The online judge account does not exist.")
 
 def verify_file(path: pathlib.Path, *, compilers: List[str], tle: float, jobs: int) -> Optional[bool]:
+    global vjudge
     logger.info('verify: %s', path)
 
     language = onlinejudge_verify.languages.list.get(path)
