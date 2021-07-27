@@ -117,6 +117,7 @@ class VJudge:
 
         # Submitting Solution
         driver.get(submission_url)
+        driver.get(submission_url)
         
         # click submit button
         element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[1]/div[1]/button")))
