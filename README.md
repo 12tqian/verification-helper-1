@@ -7,6 +7,12 @@
 
 [README 日本語バージョン](README.ja.md)
 
+## NOTE:
+
+All credit goes to the original creators. I just modified it slightly to fit my needs better:
+- Made the bundle omit the lines things so I can copy easier.
+- Created auto-verification to [vjudge](http://vjudge.net/) so I can verify more things. (Supports Kattis, Codeforces, AtCoder, SPOJ) 
+
 ## What is this?
 
 This is a tool to easily automate the verify process of your code library for competitive programming.
