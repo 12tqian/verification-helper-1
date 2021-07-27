@@ -77,14 +77,16 @@ class VJudge:
         if judge_name == '':
             return None
         add = ''
+        lst = problem_link.split('/')
+        if (lst[-1] == ''):
+            lst.pop()
         if judge_name == 'codeforces':
-            lst = problem_link.split('/')
             if lst[-2] == 'problem':
                 add = lst[-3] + lst[-1];
             else:
                 add = lst[-2] + lst[-1]
         elif judge_name == 'atcoder' or judge_name == 'spoj' or judge_name == 'kattis':
-            add = problem_link.split('/')[-1]
+            add = lst[-1]
         if (judge_name == 'atcoder'):
             add = add.split('?')[0] # get rid of language extension
         return [judge_name, self.PROBLEM_URL + self.JUDGE_PREFIX[judge_name] + '-' + add]
