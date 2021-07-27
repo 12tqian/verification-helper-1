@@ -158,7 +158,7 @@ class VJudge:
                 driver.quit()
                 return False
             time.sleep(0.25)
-            if time.time() - start>= 60:
+            if time.time() - start >= 120:
                 break
         driver.quit()
         return False
