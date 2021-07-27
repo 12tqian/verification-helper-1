@@ -12,6 +12,7 @@
 All credit goes to the original creators. I just modified it slightly to fit my needs better:
 - Made the bundle omit the lines things so I can copy easier.
 - Created auto-verification to [vjudge](http://vjudge.net/) so I can verify more things. (Supports Kattis, Codeforces, AtCoder, SPOJ) 
+- If you define IGNORE, it's like saying it's automatically correct. 
 
 ## What is this?
 
