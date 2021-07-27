@@ -21,7 +21,6 @@ from onlinejudge_verify.languages.cplusplus_bundle import BundleError
 
 logger = getLogger(__name__)
 
-# judges = {}
 vjudge = VJudge("", "")
 
 class VerificationSummary:
@@ -59,7 +58,6 @@ def initialize_judges():
     if (os.environ.get('OJ_USERNAME') and os.environ.get('OJ_PASSWORD')):
         username = os.environ.get('OJ_USERNAME')
         password = os.environ.get('OJ_PASSWORD')
-        # judges['codeforces.com'] = Codeforces(username, password)
         vjudge = VJudge(username, password)
     else:
         logger.warning("The online judge account does not exist.")
