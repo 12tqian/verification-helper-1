@@ -116,51 +116,58 @@ class VJudge:
         judge_name, submission_url = self.get_vjudge_problem_link(problem_link)
 
         # Submitting Solution
-        driver.get(submission_url)
-        driver.get(submission_url)
-        driver.get(submission_url)
-                
-        # click submit button
-        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[1]/div[1]/button")))
-        driver.execute_script("arguments[0].click();", element)
-
-        # select language
-        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div/select")))  
-        value = self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language]
-        driver.execute_script('''
-                                var select = arguments[0]; 
-                                for (var i = 0; i < select.options.length; i++) { 
-                                    if (select.options[i].value == arguments[1]) { 
-                                        select.options[i].selected = true; 
-                                    } 
-                                }''', element, value);
-
-        # insert code
-        new_code = solution.solution_code + "\n// " + str(self.current_millisecond_time())
-        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[6]/div/textarea")))
-        driver.execute_script("arguments[0].value = arguments[1];", element, new_code)
-
-        # click submit
-        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]")))
-        driver.execute_script("arguments[0].click();", element)
-        
-        start = time.time()
-        # repeat check for result
-        while True: 
+        MAX_RETRIES = 5
+        retries = 0
+        while retries <= MAX_RETRIES:
             try:
-                text = wait.until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div[2]/div[1]/table/tbody/tr[1]/td"))).text
+                driver.get(submission_url)
+                driver.get(submission_url)
+                driver.get(submission_url)
+                        
+                # click submit button
+                element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[1]/div[1]/button")))
+                driver.execute_script("arguments[0].click();", element)
+
+                # select language
+                element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div/select")))  
+                value = self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language]
+                driver.execute_script('''
+                                        var select = arguments[0]; 
+                                        for (var i = 0; i < select.options.length; i++) { 
+                                            if (select.options[i].value == arguments[1]) { 
+                                                select.options[i].selected = true; 
+                                            } 
+                                        }''', element, value);
+
+                # insert code
+                new_code = solution.solution_code + "\n// " + str(self.current_millisecond_time())
+                element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[6]/div/textarea")))
+                driver.execute_script("arguments[0].value = arguments[1];", element, new_code)
+
+                # click submit
+                element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]")))
+                driver.execute_script("arguments[0].click();", element)
+                
+                start = time.time()
+                # repeat check for result
+                while True: 
+                    try:
+                        text = wait.until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div[2]/div[1]/table/tbody/tr[1]/td"))).text
+                    except:
+                        text = ''
+                    text = text.split(' ')[0]
+                    if text in self.GOOD_VERDICTS:
+                        driver.quit()
+                        return True
+                    elif text in self.BAD_VERDICTS:
+                        driver.quit()
+                        return False
+                    time.sleep(0.25)
+                    if time.time() - start >= 120:
+                        break
             except:
-                text = ''
-            text = text.split(' ')[0]
-            if text in self.GOOD_VERDICTS:
-                driver.quit()
-                return True
-            elif text in self.BAD_VERDICTS:
-                driver.quit()
-                return False
-            time.sleep(0.25)
-            if time.time() - start >= 120:
-                break
+                retries += 1
+                driver.refresh()
         driver.quit()
         return False
 
