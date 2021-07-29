@@ -39,15 +39,17 @@ def get_parser() -> argparse.ArgumentParser:
 
     subparsers = parser.add_subparsers(dest='subcommand')
 
+    TIMEOUT = 1800
+
     subparser = subparsers.add_parser('all')
     subparser.add_argument('-j', '--jobs', type=int, default=1)
-    subparser.add_argument('--timeout', type=float, default=600)
+    subparser.add_argument('--timeout', type=float, default=TIMEOUT)
     subparser.add_argument('--tle', type=float, default=60)
 
     subparser = subparsers.add_parser('run')
     subparser.add_argument('path', nargs='*', type=pathlib.Path)
     subparser.add_argument('-j', '--jobs', type=int, default=1)
-    subparser.add_argument('--timeout', type=float, default=600)
+    subparser.add_argument('--timeout', type=float, default=TIMEOUT)
     subparser.add_argument('--tle', type=float, default=60)
 
     subparser = subparsers.add_parser('docs')
