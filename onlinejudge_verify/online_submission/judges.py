@@ -116,7 +116,7 @@ class VJudge:
         judge_name, submission_url = self.get_vjudge_problem_link(problem_link)
 
         # Submitting Solution
-        MAX_RETRIES = 5
+        MAX_RETRIES = 2
         retries = 0
         while retries <= MAX_RETRIES:
             try:
