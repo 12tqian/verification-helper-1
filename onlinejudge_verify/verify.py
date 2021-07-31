@@ -184,6 +184,7 @@ def main(paths: List[pathlib.Path], *, marker: onlinejudge_verify.marker.Verific
         
         if marker.is_verified(path):
             continue
+        print(path)
 
         verified = verify_file(path, compilers=compilers, tle=tle, jobs=jobs)
 
