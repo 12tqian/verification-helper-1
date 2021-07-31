@@ -134,7 +134,7 @@ def verify_file(path: pathlib.Path, *, compilers: List[str], tle: float, jobs: i
     cnt = 0
     for environment in language.list_environments(path, basedir=pathlib.Path.cwd()):
         cnt += 1
-        print(cnt, "TIME CHECKING")
+        # print(cnt, "TIME CHECKING")
         # compile the ./a.out
         try:
             environment.compile(path, basedir=pathlib.Path.cwd(), tempdir=directory)
@@ -186,7 +186,7 @@ def main(paths: List[pathlib.Path], *, marker: onlinejudge_verify.marker.Verific
         
         if marker.is_verified(path):
             continue
-        print(path)
+        # print(path)
 
         verified = verify_file(path, compilers=compilers, tle=tle, jobs=jobs)
 
