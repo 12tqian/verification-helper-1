@@ -131,8 +131,10 @@ def verify_file(path: pathlib.Path, *, compilers: List[str], tle: float, jobs: i
             if isinstance(problem, onlinejudge.service.yukicoder.YukicoderProblem) and not os.environ.get('YUKICODER_TOKEN'):
                 logger.warning('the $YUKICODER_TOKEN environment variable is not set')
             return False
-
+    cnt = 0
     for environment in language.list_environments(path, basedir=pathlib.Path.cwd()):
+        cnt += 1
+        print(cnt, "TIME CHECKING")
         # compile the ./a.out
         try:
             environment.compile(path, basedir=pathlib.Path.cwd(), tempdir=directory)
