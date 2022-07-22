@@ -1,18 +1,22 @@
-from onlinejudge_verify.online_submission.submissions import *
-from requests import session
+from submissions import *
+
+import util
+import time
 import requests
-import mechanize
+
+from pyvirtualdisplay import Display  
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
+from webdriver_manager.chrome import ChromeDriverManager
 
-import time
-import json
-import traceback
+from logging import DEBUG, basicConfig, getLogger
+
+logger = getLogger(__name__)
 
 class VJudge:
     JUDGE_NAME = "vjudge"
@@ -91,45 +95,80 @@ class VJudge:
             add = add.split('?')[0] # get rid of language extension
         return [judge_name, self.PROBLEM_URL + self.JUDGE_PREFIX[judge_name] + '-' + add]
 
-    def submit_solution(self, problem_link, solution): 
-        # Logging in
+    def is_signed_in(self, driver):
+        try: 
+            driver.find_element(By.CLASS_NAME,'logout')
+            logger.info('Already signed in.')
+            return True
+        except NoSuchElementException:
+            return False
+    
+    def sign_in(self, driver, url, username, password):
+        logger.info('Signing in.')
+        driver.get(url)
+        util.wait_for_page(driver, 'Virtual Judge')
         
+        try:
+            action = ActionChains(driver)
+            button = WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
+                (By.CLASS_NAME, 'login')
+            ))
+            action.move_to_element(button).click().perform()
+            WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
+                (By.ID, 'btn-login')
+            ))
+        except NoSuchElementException:
+            logger.error('Login button not present.')
+        
+        if not self.is_signed_in(driver):
+            user = util.wait_for_element(driver, "login-username")
+            pwd = util.wait_for_element(driver, "login-password")
+
+            user.send_keys(username)
+            pwd.send_keys(password)
+
+            try:
+                action = ActionChains(driver)
+                button = util.wait_for_element(driver, 'btn-login')
+                action.move_to_element(button).click().perform()
+                WebDriverWait(driver, 5).until(EC.staleness_of(button))
+            except NoSuchElementException:
+                logger.error('Error signing in.')
+                
+    def submit_solution(self, problem_link, solution): 
         options = Options()
         options.add_argument('--headless')
         options.add_argument('--disable-gpu')  # Last I checked this was necessary.
-        driver = webdriver.Chrome(chrome_options=options)
-        driver.get(self.JUDGE_URL)
-        wait = WebDriverWait(driver, 10)
-
-        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[8]/a")))
-        driver.execute_script("arguments[0].click();", element)
-
-        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[1]/input")))
-        driver.execute_script("arguments[0].value = arguments[1];", element, self.username)
-
-        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[2]/input")))
-        driver.execute_script("arguments[0].value = arguments[1];", element, self.password)
-
-        element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div/div[3]/button[3]")))
-        driver.execute_script("arguments[0].click();", element)
-
+        
+        display = Display(visible=False, size=(800, 800)) # for some reason this is necessary
+        display.start()
+        
+        driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+        # driver = webdriver.Chrome(chrome_options=options) # old version
+        
+        self.sign_in(driver, self.JUDGE_URL, self.username, self.password)
+        logger.info('Successfully signed in.')
+        
         judge_name, submission_url = self.get_vjudge_problem_link(problem_link)
 
-        # Submitting Solution
         MAX_RETRIES = 5
-        retries = 0
+        retries = 1
+        
         while retries <= MAX_RETRIES:
+            logger.info(f'Trying ({retries}) times.')
             try:
                 driver.get(submission_url)
-                driver.get(submission_url)
-                driver.get(submission_url)
-                        
+               
                 # click submit button
-                element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[1]/div[2]/div/div[1]/div[1]/button")))
-                driver.execute_script("arguments[0].click();", element)
-
+                element = WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
+                    (By.XPATH, '/html/body/div[1]/div/div[1]/div[2]/div/div[1]/div[1]/button')
+                ))
+                element.click()
+                
                 # select language
-                element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div/select")))  
+                element = WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
+                    (By.ID, 'submit-language')
+                ))  
                 value = self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language]
                 driver.execute_script('''
                                         var select = arguments[0]; 
@@ -139,20 +178,31 @@ class VJudge:
                                             } 
                                         }''', element, value);
 
+               
                 # insert code
                 new_code = solution.solution_code + "\n// " + str(self.current_millisecond_time())
-                element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[2]/form/div/div[6]/div/textarea")))
-                driver.execute_script("arguments[0].value = arguments[1];", element, new_code)
-
+                element = WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
+                    (By.ID, 'submit-solution')
+                ))
+                element.send_keys(new_code)
+                driver.save_screenshot('basdf.asdf.png')
+                
                 # click submit
-                element = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]")))
-                driver.execute_script("arguments[0].click();", element)
+                element = WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
+                    (By.XPATH, '/html/body/div[3]/div/div/div[3]/button[2]')
+                ))
+                element.click()
+                
+                logger.info('Solution for {problem_link} submitted.')
                 
                 start = time.time()
+                
                 # repeat check for result
                 while True: 
                     try:
-                        text = wait.until(EC.visibility_of_element_located((By.XPATH, "/html/body/div[3]/div/div/div[2]/div[1]/table/tbody/tr[1]/td"))).text
+                        text = WebDriverWait(driver, 5).until(EC.visibility_of_element_located(
+                            (By.XPATH, "/html/body/div[3]/div/div/div[2]/div[1]/table/tbody/tr[1]/td")
+                        )).text
                     except:
                         text = ''
                     text = text.split(' ')[0]
@@ -162,152 +212,13 @@ class VJudge:
                     elif text in self.BAD_VERDICTS:
                         driver.quit()
                         return False
+                    
                     time.sleep(0.25)
                     if time.time() - start >= 120:
                         break
             except:
                 retries += 1
                 driver.refresh()
+                
         driver.quit()
         return False
-
-class Codeforces:
-    JUDGE_NAME = "codeforces"
-    JUDGE_URL = "https://codeforces.com/"
-    LOGIN_URL = "https://codeforces.com/enter"
-    SUBMISSION_URL = "https://codeforces.com/problemset/submit"
-    RESULT_URL = "https://codeforces.com/contest/"
-    LANGUAGES = {
-        "C" : "43", #GNU GCC C11 5.1.0
-        "java" : "36", # Java 1.8.0_241
-        "cpp" : "61", # 
-        "C++" : "61", # C++ 17 64 bit
-        "py" : "41" #PyPy 3.6 (7.2.0)
-    }
-
-    username: str
-    password: str
-    logged_in: bool
-    br: mechanize.Browser
-
-    def __init__(self, username = "", password = ""):
-        self.username = username
-        self.password = password
-        self.logged_in = False
-        self.br = mechanize.Browser()
-
-        # Browser options
-        self.br.set_handle_equiv(True)
-        self.br.set_handle_gzip(True)
-        self.br.set_handle_redirect(True)
-        self.br.set_handle_referer(True)
-        self.br.set_handle_robots(False)
-        self.br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time = 1)
-
-        self.br.addheaders = [('User-agent', 'Chrome')]
-
-    def login(self):
-        # print("Trying to log into CodeForces: " + self.username)
-        # The site we will navigate into, handling it's session
-        self.br.open(self.LOGIN_URL)
-
-        # Select the second (index one) form (the first form is a search query box)
-        # Logging in
-        self.br.select_form(nr = 1)
-        self.logged_in = True
-        
-        self.br.form['handleOrEmail'] = self.username
-        self.br.form['password'] = self.password
-
-        res = self.br.submit()
-
-        if res.geturl() == self.JUDGE_URL:
-            # print("Logged In Successfully")
-            return True
-        else:
-            # print("CF: Sorry, wrong username/password. Please try again.")
-            self.logged_in = False
-            return False
-
-    def get_contest_number(self, problem_id):
-        res = ''
-        for i in range(len(problem_id)):
-            if problem_id[i].isdigit():
-                res += problem_id[i]
-            else:
-                break
-        return int(res)
-
-    def current_millisecond_time(self):
-        return round(time.time() * 1000)
-
-    def submit_solution(self, problem, solution):
-        if not self.logged_in:
-            self.login()
-        self.br.open(self.SUBMISSION_URL)
-        self.br.select_form(nr = 1)
-        
-        self.br.form.find_control(name = "programTypeId").value = [self.LANGUAGES[solution.language]]
-        self.br.form.find_control(name = "submittedProblemCode").value = str(problem.problem_id)
-        self.br.form.find_control(name = "source").value = solution.solution_code + "\n// " + str(self.current_millisecond_time())
-        res = self.br.submit()
-        if "https://codeforces.com/problemset/status?my=on" != str(res.geturl()):
-            return ""
-            
-        # then we should check if the verdict has been given
-        # should check repeatedly delaying 5-10 secs and stop when a verdict is given
-        time.sleep(0.25)
-        response = requests.get("https://codeforces.com/api/user.status?handle=" + self.username + "&from=1&count=1")
-        submission_id = ""
-        if response.status_code == 200:
-            try:
-                data = json.loads(response.content.decode('utf-8'))
-            except:
-                return False
-            submission_id = data['result'][0]['id']
-        else:   
-            # print("Could't get submission id. Please try this problem again later.")
-            return False
-
-        submission_url = self.RESULT_URL + str(self.get_contest_number(problem.problem_id)) + '/submission/' + str(submission_id)
-
-        # wait for result
-
-        start = time.time()
-        time.sleep(0.25)
-        
-        # print(submission_url)
-        
-        while True:
-            if (time.time() - start >= 60):
-                break
-            response = requests.get("https://codeforces.com/api/user.status?handle=" + self.username + "&from=1&count=1")
-            try: 
-                data = json.loads(response.content.decode('utf-8'))
-            except:
-                time.sleep(0.5)
-                continue
-            
-            data = data['result'][0]
-
-            if 'verdict' not in data.keys():
-                continue
-            
-            try:
-                verdict = str(data['verdict'])
-            except:
-                traceback.print_exc()
-                # print(data)
-                return False
-
-            if verdict == "TESTING":
-                time.sleep(0.25)
-            else:
-                if verdict == "OK":
-                    return True
-                else:
-                    return False
-                break
-                
-        return False
-

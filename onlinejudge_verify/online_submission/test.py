@@ -6,9 +6,9 @@ import time
 
 def current_milli_time():
     return round(time.time() * 1000)
-
-judge = Codeforces('vhelperoj', 'verificationpassword')
-problem = Problem('codeforces', '4A')
+judge = VJudge('vhelperoj', 'verificationpassword')
+# problem = Problem('codeforces', '4A')
+problem_link = 'https://codeforces.com/problemset/problem/4/A'
 solution = Solution('C++', '''#include <bits/stdc++.h>
 
 using namespace std;
@@ -25,8 +25,7 @@ int main() {
     }
     return 0; 
 }''')
-
-print(judge.submit_solution(problem, solution))
+print(judge.submit_solution(problem_link, solution))
 
 
     
