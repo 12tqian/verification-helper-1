@@ -228,11 +228,11 @@ class VJudge:
         while retries <= MAX_RETRIES:
             logger.info(f"Trying ({retries}) times.")
             try:
-                logger.info(f"Navigating to {submission_url}.")
+                logger.info(f"Navigating to {submission_url} .")
                 driver.get(submission_url)
 
                 # click submit button
-                logger.info(f"Clicking submit buttton for {problem_link}.")
+                logger.info(f"Clicking submit buttton for {problem_link} .")
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
                         (
@@ -244,7 +244,7 @@ class VJudge:
                 element.send_keys(Keys.RETURN)
 
                 # select language
-                logger.info(f"Selecting language for {problem_link}")
+                logger.info(f"Selecting language for {problem_link} .")
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
                         (
@@ -288,7 +288,7 @@ class VJudge:
                 time.sleep(2)  # 2 seconds for copy paste
 
                 # click submit
-                logger.info("fClicking final submission {problem_link}")
+                logger.info(f"Clicking final submission {problem_link} .")
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
                         (By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]")
@@ -304,7 +304,7 @@ class VJudge:
                 checked_times = 1
                 while True:
                     logger.info(
-                        f"Checking submission {checked_times} times for {problem_link}."
+                        f"Checking submission {checked_times} times for {problem_link} ."
                     )
                     try:
                         text = (
