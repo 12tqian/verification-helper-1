@@ -167,9 +167,11 @@ class VJudge:
             self.driver = webdriver.Chrome(chrome_options=options)  # old version
 
         driver = self.driver
-
+        print("signing in")
         self.sign_in(driver, self.JUDGE_URL, self.username, self.password)
         logger.info("Successfully signed in.")
+
+        print("signed in")
 
         judge_name, submission_url = self.get_vjudge_problem_link(problem_link)
 
@@ -180,7 +182,7 @@ class VJudge:
             logger.info(f"Trying ({retries}) times.")
             try:
                 driver.get(submission_url)
-
+                print("clicking submission button")
                 # click submit button
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
@@ -191,8 +193,9 @@ class VJudge:
                     )
                 )
                 element.click()
-
+                print("clicked submission button")
                 # select language
+                print("selecting language")
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable((By.ID, "submit-language"))
                 )
@@ -208,7 +211,8 @@ class VJudge:
                     element,
                     value,
                 )
-
+                print("selected language")
+                print("inserting code")
                 # insert code
                 new_code = (
                     solution.solution_code
@@ -219,7 +223,9 @@ class VJudge:
                     EC.element_to_be_clickable((By.ID, "submit-solution"))
                 )
                 element.send_keys(new_code)
+                print("inserted code and waiting")
                 driver.implicitly_wait(2)  # 2 seconds for copy paste
+                print("waiting finished and submitting")
 
                 # click submit
                 element = WebDriverWait(driver, 5).until(
@@ -228,6 +234,7 @@ class VJudge:
                     )
                 )
                 element.click()
+                print("clicked submit")
 
                 logger.info(f"Solution for {problem_link} submitted.")
 
