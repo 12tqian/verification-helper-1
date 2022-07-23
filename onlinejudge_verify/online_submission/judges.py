@@ -23,26 +23,35 @@ from logging import INFO, basicConfig, getLogger
 
 logger = getLogger(__name__)
 
+
 def push_debug(path) -> None:
     # read config
-    logger.info('use GITHUB_TOKEN')  # NOTE: don't use GH_PAT here, because it may cause infinite loops with triggering GitHub Actions itself
-    url = 'https://{}:{}@github.com/{}.git'.format(os.environ['GITHUB_ACTOR'], os.environ['GITHUB_TOKEN'], os.environ['GITHUB_REPOSITORY'])
-    logger.info('GITHUB_ACTOR = %s', os.environ['GITHUB_ACTOR'])
-    logger.info('GITHUB_REPOSITORY = %s', os.environ['GITHUB_REPOSITORY'])
+    logger.info(
+        "use GITHUB_TOKEN"
+    )  # NOTE: don't use GH_PAT here, because it may cause infinite loops with triggering GitHub Actions itself
+    url = "https://{}:{}@github.com/{}.git".format(
+        os.environ["GITHUB_ACTOR"],
+        os.environ["GITHUB_TOKEN"],
+        os.environ["GITHUB_REPOSITORY"],
+    )
+    logger.info("GITHUB_ACTOR = %s", os.environ["GITHUB_ACTOR"])
+    logger.info("GITHUB_REPOSITORY = %s", os.environ["GITHUB_REPOSITORY"])
 
     # commit and push
-    logger.info('starting push')
-    subprocess.check_call(['git', 'config', '--global', 'user.name', 'GitHub'])
-    subprocess.check_call(['git', 'config', '--global', 'user.email', 'noreply@github.com'])
-    logger.info('pushing')
+    logger.info("starting push")
+    subprocess.check_call(["git", "config", "--global", "user.name", "GitHub"])
+    subprocess.check_call(
+        ["git", "config", "--global", "user.email", "noreply@github.com"]
+    )
+    logger.info("pushing")
     path = pathlib.Path(path)
-    logger.info('$ git add %s && git commit && git push', str(path))
+    logger.info("$ git add %s && git commit && git push", str(path))
     if path.exists():
-        subprocess.check_call(['git', 'add', str(path)])
-    if subprocess.run(['git', 'diff', '--quiet', '--staged'], check=False).returncode:
-        message = '[auto-verifier] verify commit {}'.format(os.environ['GITHUB_SHA'])
-        subprocess.check_call(['git', 'commit', '-m', message])
-        subprocess.check_call(['git', 'push', url, 'HEAD'])
+        subprocess.check_call(["git", "add", str(path)])
+    if subprocess.run(["git", "diff", "--quiet", "--staged"], check=False).returncode:
+        message = "[auto-verifier] verify commit {}".format(os.environ["GITHUB_SHA"])
+        subprocess.check_call(["git", "commit", "-m", message])
+        subprocess.check_call(["git", "push", url, "HEAD"])
 
 
 class VJudge:
@@ -157,28 +166,36 @@ class VJudge:
             )
             element.send_keys(Keys.RETURN)
             WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div/div[3]/button[3]'))
+                EC.element_to_be_clickable(
+                    (By.XPATH, "/html/body/div[4]/div/div/div[3]/button[3]")
+                )
             )
         except NoSuchElementException:
             logger.error("Login button not present.")
 
         if not self.is_signed_in(driver):
             user = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div/div[2]/form/div[1]/input'))
+                EC.element_to_be_clickable(
+                    (By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[1]/input")
+                )
             )
-        
+
             pwd = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div/div[2]/form/div[2]/input'))
+                EC.element_to_be_clickable(
+                    (By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[2]/input")
+                )
             )
 
             user.send_keys(username)
             pwd.send_keys(password)
-            
+
             time.sleep(0.5)
-            
+
             try:
                 element = WebDriverWait(driver, 5).until(
-                    EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div/div[3]/button[3]'))
+                    EC.element_to_be_clickable(
+                        (By.XPATH, "/html/body/div[4]/div/div/div[3]/button[3]")
+                    )
                 )
                 element.send_keys(Keys.RETURN)
                 time.sleep(0.5)
@@ -190,14 +207,16 @@ class VJudge:
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")  # Last I checked this was necessary.
 
-        display = Display(visible=False, size=(800, 800)) # for some reason this is necessary
+        display = Display(
+            visible=False, size=(800, 800)
+        )  # for some reason this is necessary
         display.start()
         # self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
 
         self.driver = webdriver.Chrome(chrome_options=options)  # old version
 
         driver = self.driver
-        
+
         self.sign_in(driver, self.JUDGE_URL, self.username, self.password)
         logger.info("Successfully signed in.")
 
@@ -205,12 +224,15 @@ class VJudge:
 
         MAX_RETRIES = 5
         retries = 1
+
         while retries <= MAX_RETRIES:
             logger.info(f"Trying ({retries}) times.")
             try:
+                logger.info(f"Navigating to {submission_url}.")
                 driver.get(submission_url)
-                logger.info(f'Clicking submit buttton for {problem_link}.')
+
                 # click submit button
+                logger.info(f"Clicking submit buttton for {problem_link}.")
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
                         (
@@ -220,10 +242,16 @@ class VJudge:
                     )
                 )
                 element.send_keys(Keys.RETURN)
+
                 # select language
-                logger.info(f'Selecting language for {problem_link}')
+                logger.info(f"Selecting language for {problem_link}")
                 element = WebDriverWait(driver, 5).until(
-                    EC.element_to_be_clickable((By.XPATH, '/html/body/div[3]/div/div/div[2]/form/div/div[4]/div[2]/div/select'))
+                    EC.element_to_be_clickable(
+                        (
+                            By.XPATH,
+                            "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div[2]/div/select",
+                        )
+                    )
                 )
                 value = self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language]
                 driver.execute_script(
@@ -240,27 +268,33 @@ class VJudge:
                 time.sleep(0.5)
 
                 # insert code
-                logger.info(f'Inputting code for {problem_link}.')
+                logger.info(f"Inputting code for {problem_link}.")
                 new_code = (
                     solution.solution_code
                     + "\n// "
                     + str(self.current_millisecond_time())
                 )
                 element = WebDriverWait(driver, 5).until(
-                    EC.element_to_be_clickable((By.XPATH, '/html/body/div[3]/div/div/div[2]/form/div/div[4]/div[4]/div/textarea'))
+                    EC.element_to_be_clickable(
+                        (
+                            By.XPATH,
+                            "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div[4]/div/textarea",
+                        )
+                    )
                 )
-                driver.execute_script("arguments[0].value = arguments[1];", element, new_code)
+                driver.execute_script(
+                    "arguments[0].value = arguments[1];", element, new_code
+                )
                 time.sleep(2)  # 2 seconds for copy paste
-                
+
                 # click submit
-                logger.info('fClicking final submission {problem_link}')
+                logger.info("fClicking final submission {problem_link}")
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
-                        (By.XPATH, '/html/body/div[3]/div/div/div[3]/button[2]')
+                        (By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]")
                     )
                 )
                 element.send_keys(Keys.RETURN)
-                # element.click() 
 
                 logger.info(f"Solution for {problem_link} submitted.")
 
@@ -269,7 +303,9 @@ class VJudge:
                 # repeatedly check for result
                 checked_times = 1
                 while True:
-                    logger.info(f'Checking submission {checked_times} times for {problem_link}.')
+                    logger.info(
+                        f"Checking submission {checked_times} times for {problem_link}."
+                    )
                     try:
                         text = (
                             WebDriverWait(driver, 5)
@@ -287,11 +323,11 @@ class VJudge:
                         text = ""
                     text = text.split(" ")[0]
                     if self.check(text, self.GOOD_VERDICTS):
-                        logger.info('{problem_link} was successful.')
+                        logger.info("{problem_link} was successful.")
                         driver.quit()
                         return True
                     elif self.check(text, self.BAD_VERDICTS):
-                        logger.info('{problem_link} failed.')
+                        logger.info("{problem_link} failed.")
                         driver.quit()
                         return False
 
