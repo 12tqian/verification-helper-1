@@ -3,6 +3,7 @@ import onlinejudge_verify.online_submission.utils as utils
 # import utils # for some reason this doesn't work...
 import time
 import requests
+import os
 
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -19,6 +20,25 @@ import colorlog
 from logging import INFO, basicConfig, getLogger
 
 logger = getLogger(__name__)
+
+def push_debug() -> None:
+    # read config
+    logger.info('use GITHUB_TOKEN')  # NOTE: don't use GH_PAT here, because it may cause infinite loops with triggering GitHub Actions itself
+    url = 'https://{}:{}@github.com/{}.git'.format(os.environ['GITHUB_ACTOR'], os.environ['GITHUB_TOKEN'], os.environ['GITHUB_REPOSITORY'])
+    logger.info('GITHUB_ACTOR = %s', os.environ['GITHUB_ACTOR'])
+    logger.info('GITHUB_REPOSITORY = %s', os.environ['GITHUB_REPOSITORY'])
+
+    # commit and push
+    subprocess.check_call(['git', 'config', '--global', 'user.name', 'GitHub'])
+    subprocess.check_call(['git', 'config', '--global', 'user.email', 'noreply@github.com'])
+    path = pathlib.Path('.verify-helper/dbg.png')
+    logger.info('$ git add %s && git commit && git push', str(path))
+    if path.exists():
+        subprocess.check_call(['git', 'add', str(path)])
+    if subprocess.run(['git', 'diff', '--quiet', '--staged'], check=False).returncode:
+        message = '[auto-verifier] verify commit {}'.format(os.environ['GITHUB_SHA'])
+        subprocess.check_call(['git', 'commit', '-m', message])
+        subprocess.check_call(['git', 'push', url, 'HEAD'])
 
 
 class VJudge:
@@ -227,7 +247,8 @@ class VJudge:
                 print("inserted code and waiting")
                 time.sleep(3)  # 2 seconds for copy paste
                 print("waiting finished and submitting")
-
+                driver.save_screenshot('.verify-helper/dbg.png')
+                push_debug()
                 # click submit
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
