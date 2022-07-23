@@ -21,7 +21,8 @@ setup(
         'selenium',
         'py'
         'logging',
-        'pyvirtualdisplay'
+        'pyvirtualdisplay',
+        'webdriver_manager'
     ],
     packages=find_packages(exclude=('tests', 'docs')),
     package_data={
