@@ -240,8 +240,10 @@ class VJudge:
                 # select language
                 print("selecting language")
                 element = WebDriverWait(driver, 5).until(
-                    EC.element_to_be_clickable((By.ID, "submit-language"))
+                    EC.element_to_be_clickable((By.XPATH, '/html/body/div[3]/div/div/div[2]/form/div/div[4]/div[2]/div/select'))
                 )
+                driver.save_screenshot('.verify-helper/dbg7.png')
+                push_debug('.verify-helper/dbg7.png')
                 value = self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language]
                 driver.execute_script(
                     """
@@ -263,11 +265,12 @@ class VJudge:
                     + str(self.current_millisecond_time())
                 )
                 element = WebDriverWait(driver, 5).until(
-                    EC.element_to_be_clickable((By.ID, "submit-solution"))
+                    EC.element_to_be_clickable((By.XPATH, '/html/body/div[3]/div/div/div[2]/form/div/div[4]/div[4]/div/textarea'))
                 )
                 element.send_keys(new_code)
                 print("inserted code and waiting")
-                time.sleep(3)  # 2 seconds for copy paste
+                time.sleep(2)  # 2 seconds for copy paste
+                
                 print("waiting finished and submitting")
                 driver.save_screenshot('.verify-helper/dbg.png')
                 push_debug('.verify-helper/dbg.png')
