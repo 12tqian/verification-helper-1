@@ -6,7 +6,7 @@ setup(
     version='5.6.0',
     author='Kimiyuki Onaka',
     author_email='kimiyuki95@gmail.com',
-    url='https://github.com/12tqian/verification-helper-1',
+    url='https://github.com/12tqian/verification-helper',
     license='MIT License',
     description='',
     python_requires='>=3.6',
