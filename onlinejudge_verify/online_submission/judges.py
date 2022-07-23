@@ -147,10 +147,10 @@ class VJudge:
             options.add_argument('--headless')
             options.add_argument('--disable-gpu')  # Last I checked this was necessary.
             
-            display = Display(visible=False, size=(800, 800)) # for some reason this is necessary
-            display.start()
-            
+            # display = Display(visible=False, size=(800, 800)) # for some reason this is necessary
+            # display.start()
             # self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+            
             driver = webdriver.Chrome(chrome_options=options) # old version
         
         driver = self.driver 
