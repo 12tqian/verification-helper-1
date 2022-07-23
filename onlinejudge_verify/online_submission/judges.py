@@ -256,6 +256,7 @@ class VJudge:
                     element,
                     value,
                 )
+                time.sleep(0.5)
                 print("selected language")
                 print("inserting code")
                 driver.save_screenshot('.verify-helper/dbg7.png')
