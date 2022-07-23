@@ -151,8 +151,6 @@ class VJudge:
         logger.info("Signing in.")
         driver.get(url)
         utils.wait_for_page(driver, "Virtual Judge")
-        driver.save_screenshot('.verify-helper/dbg0.png')
-        push_debug('.verify-helper/dbg0.png')
         try:
             element = WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[9]/a"))
@@ -161,8 +159,6 @@ class VJudge:
             WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div/div[3]/button[3]'))
             )
-            driver.save_screenshot('.verify-helper/dbg1.png')
-            push_debug('.verify-helper/dbg1.png')
         except NoSuchElementException:
             logger.error("Login button not present.")
 
@@ -180,17 +176,12 @@ class VJudge:
             
             time.sleep(0.5)
             
-            driver.save_screenshot('.verify-helper/dbg2.png')
-            push_debug('.verify-helper/dbg2.png')
-            
             try:
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div/div[3]/button[3]'))
                 )
                 element.send_keys(Keys.RETURN)
                 time.sleep(0.5)
-                driver.save_screenshot('.verify-helper/dbg3.png')
-                push_debug('.verify-helper/dbg3.png')
             except NoSuchElementException:
                 logger.error("Error signing in.")
 
@@ -207,23 +198,18 @@ class VJudge:
             self.driver = webdriver.Chrome(chrome_options=options)  # old version
 
         driver = self.driver
-        print("signing in")
         self.sign_in(driver, self.JUDGE_URL, self.username, self.password)
         logger.info("Successfully signed in.")
-
-        print("signed in")
 
         judge_name, submission_url = self.get_vjudge_problem_link(problem_link)
 
         MAX_RETRIES = 5
         retries = 1
-        driver.save_screenshot('.verify-helper/dbg4.png')
-        push_debug('.verify-helper/dbg4.png')
         while retries <= MAX_RETRIES:
             logger.info(f"Trying ({retries}) times.")
             try:
                 driver.get(submission_url)
-                print("clicking submission button")
+                logger.info(f'Clicking submit buttton for {problem_link}.')
                 # click submit button
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
@@ -234,13 +220,8 @@ class VJudge:
                     )
                 )
                 element.send_keys(Keys.RETURN)
-                driver.save_screenshot('.verify-helper/dbg5.png')
-                push_debug('.verify-helper/dbg5.png')
-                print("clicked submission button")
                 # select language
-                print("selecting language")
-                driver.save_screenshot('.verify-helper/dbg6.png')
-                push_debug('.verify-helper/dbg6.png')
+                logger.info(f'Selecting language for {problem_link}')
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable((By.XPATH, '/html/body/div[3]/div/div/div[2]/form/div/div[4]/div[2]/div/select'))
                 )
@@ -257,11 +238,9 @@ class VJudge:
                     value,
                 )
                 time.sleep(0.5)
-                print("selected language")
-                print("inserting code")
-                driver.save_screenshot('.verify-helper/dbg7.png')
-                push_debug('.verify-helper/dbg7.png')
+
                 # insert code
+                logger.info(f'Inputting code for {problem_link}.')
                 new_code = (
                     solution.solution_code
                     + "\n// "
@@ -271,13 +250,13 @@ class VJudge:
                     EC.element_to_be_clickable((By.XPATH, '/html/body/div[3]/div/div/div[2]/form/div/div[4]/div[4]/div/textarea'))
                 )
                 driver.execute_script("arguments[0].value = arguments[1];", element, new_code)
-                print("inserted code and waiting")
                 time.sleep(2)  # 2 seconds for copy paste
                 
-                print("waiting finished and submitting")
                 driver.save_screenshot('.verify-helper/dbg.png')
                 push_debug('.verify-helper/dbg.png')
+                
                 # click submit
+                logger.info('fClicking final submission {problem_link}')
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
                         (By.XPATH, '/html/body/div[3]/div/div/div[3]/button[2]')
@@ -285,14 +264,15 @@ class VJudge:
                 )
                 element.send_keys(Keys.RETURN)
                 # element.click() 
-                print("clicked submit")
 
                 logger.info(f"Solution for {problem_link} submitted.")
 
                 start = time.time()
 
-                # repeat check for result
+                # repeatedly check for result
+                checked_times = 1
                 while True:
+                    logger.info(f'Checking submission {checked_times} times for {problem_link}.')
                     try:
                         text = (
                             WebDriverWait(driver, 5)
@@ -316,7 +296,8 @@ class VJudge:
                         driver.quit()
                         return False
 
-                    time.sleep(0.25)
+                    time.sleep(3)
+                    checked_times += 1
                     if time.time() - start >= 120:
                         break
             except:
