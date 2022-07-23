@@ -1,5 +1,3 @@
-from submissions import *
-
 import util
 import time
 import requests
