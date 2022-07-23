@@ -59,6 +59,7 @@ def initialize_judges():
         username = os.environ.get('OJ_USERNAME')
         password = os.environ.get('OJ_PASSWORD')
         vjudge = VJudge(username, password)
+        print(username, password, 'nani')
     else:
         logger.warning("The online judge account does not exist.")
 
