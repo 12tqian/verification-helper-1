@@ -239,11 +239,11 @@ class VJudge:
                 print("clicked submission button")
                 # select language
                 print("selecting language")
+                driver.save_screenshot('.verify-helper/dbg6.png')
+                push_debug('.verify-helper/dbg6.png')
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable((By.XPATH, '/html/body/div[3]/div/div/div[2]/form/div/div[4]/div[2]/div/select'))
                 )
-                driver.save_screenshot('.verify-helper/dbg7.png')
-                push_debug('.verify-helper/dbg7.png')
                 value = self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language]
                 driver.execute_script(
                     """
@@ -258,6 +258,8 @@ class VJudge:
                 )
                 print("selected language")
                 print("inserting code")
+                driver.save_screenshot('.verify-helper/dbg7.png')
+                push_debug('.verify-helper/dbg7.png')
                 # insert code
                 new_code = (
                     solution.solution_code
