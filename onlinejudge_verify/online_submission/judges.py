@@ -270,9 +270,7 @@ class VJudge:
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable((By.XPATH, '/html/body/div[3]/div/div/div[2]/form/div/div[4]/div[4]/div/textarea'))
                 )
-                element.send_keys(Keys.TAB);
-                element.clear();
-                element.send_keys(new_code)
+                driver.execute_script("arguments[0].value = arguments[1];", element, new_code)
                 print("inserted code and waiting")
                 time.sleep(2)  # 2 seconds for copy paste
                 
