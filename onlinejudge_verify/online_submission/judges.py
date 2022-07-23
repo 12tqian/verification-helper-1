@@ -143,15 +143,16 @@ class VJudge:
                 logger.error('Error signing in.')
                 
     def submit_solution(self, problem_link, solution): 
-        options = Options()
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')  # Last I checked this was necessary.
+        if self.driver is None:
+            options = Options()
+            options.add_argument('--headless')
+            options.add_argument('--disable-gpu')  # Last I checked this was necessary.
             
-        # display = Display(visible=False, size=(800, 800)) # for some reason this is necessary
-        # display.start()
-        # self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
-        
-        self.driver = webdriver.Chrome(chrome_options=options) # old version
+            # display = Display(visible=False, size=(800, 800)) # for some reason this is necessary
+            # display.start()
+            # self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+            
+            self.driver = webdriver.Chrome(chrome_options=options) # old version
         
         driver = self.driver 
         
