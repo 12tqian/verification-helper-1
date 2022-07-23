@@ -1,4 +1,4 @@
-import utils
+import onlinejudge_verify.online_submission.utils
 import time
 import requests
 
