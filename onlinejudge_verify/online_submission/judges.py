@@ -68,9 +68,9 @@ class VJudge:
 
     username: str
     password: str
-    
+
     def check(self, verdict, verdict_list):
-        for _verdict in verdict_list: 
+        for _verdict in verdict_list:
             if _verdict.lower() in verdict.lower():
                 return True
         return False
