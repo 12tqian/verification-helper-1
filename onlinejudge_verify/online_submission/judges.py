@@ -302,7 +302,10 @@ class VJudge:
 
                 # repeatedly check for result
                 checked_times = 1
+                inserted = 0
                 while True:
+                    if inserted == 0 and checked_times > 5: # we must be actually verified
+                        break
                     logger.info(
                         f"Checking submission {checked_times} times for {problem_link} ."
                     )
@@ -319,6 +322,7 @@ class VJudge:
                             )
                             .text
                         )
+                        inserted += 1
                     except:
                         text = ""
                     text = text.split(" ")[0]
