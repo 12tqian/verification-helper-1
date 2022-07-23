@@ -13,7 +13,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
-from logging import DEBUG, basicConfig, getLogger
+from logging import INFO, basicConfig, getLogger
 
 logger = getLogger(__name__)
 
@@ -71,6 +71,12 @@ class VJudge:
         self.username = username
         self.password = password
         self.driver = None
+        # configure logging
+        log_format = '%(log_color)s%(levelname)s%(reset)s:%(name)s:%(message)s'
+        handler = colorlog.StreamHandler()
+        handler.setFormatter(colorlog.ColoredFormatter(log_format))
+        basicConfig(level=INFO, handlers=[handler])
+
 
     def get_vjudge_problem_link(self, problem_link):
         judge_name = ''
@@ -144,10 +150,10 @@ class VJudge:
             display = Display(visible=False, size=(800, 800)) # for some reason this is necessary
             display.start()
             
-            self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+            # self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+            driver = webdriver.Chrome(chrome_options=options) # old version
         
         driver = self.driver 
-        # driver = webdriver.Chrome(chrome_options=options) # old version
         
         self.sign_in(driver, self.JUDGE_URL, self.username, self.password)
         logger.info('Successfully signed in.')
