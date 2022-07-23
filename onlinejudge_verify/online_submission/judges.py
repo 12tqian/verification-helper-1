@@ -155,7 +155,7 @@ class VJudge:
         try:
             action = ActionChains(driver)
             button = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.CLASS_NAME, "login"))
+                EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[9]/a"))
             )
             action.move_to_element(button).click().perform()
             WebDriverWait(driver, 5).until(
@@ -172,10 +172,9 @@ class VJudge:
             pwd.send_keys(password)
 
             try:
-                action = ActionChains(driver)
-                button = utils.wait_for_element(driver, "btn-login")
-                action.move_to_element(button).click().perform()
-                WebDriverWait(driver, 5).until(EC.staleness_of(button))
+                element = utils.wait_for_element(driver, "btn-login")
+                element.send_keys(Keys.ENTER)
+                time.sleep(0.5)
             except NoSuchElementException:
                 logger.error("Error signing in.")
 
