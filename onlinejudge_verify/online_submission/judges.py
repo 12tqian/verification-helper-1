@@ -217,7 +217,8 @@ class VJudge:
 
         MAX_RETRIES = 5
         retries = 1
-
+        driver.save_screenshot('.verify-helper/dbg4.png')
+        push_debug('.verify-helper/dbg4.png')
         while retries <= MAX_RETRIES:
             logger.info(f"Trying ({retries}) times.")
             try:
@@ -232,7 +233,9 @@ class VJudge:
                         )
                     )
                 )
-                element.send_keys(Keys.ENTER)
+                element.send_keys(Keys.RETURN)
+                driver.save_screenshot('.verify-helper/dbg5.png')
+                push_debug('.verify-helper/dbg5.png')
                 print("clicked submission button")
                 # select language
                 print("selecting language")
