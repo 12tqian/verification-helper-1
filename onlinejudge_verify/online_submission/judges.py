@@ -1,4 +1,4 @@
-import onlinejudge_verify.online_submission.utils
+import onlinejudge_verify.online_submission.utils as utils
 # import utils # for some reason this doesn't work...
 import time
 import requests
