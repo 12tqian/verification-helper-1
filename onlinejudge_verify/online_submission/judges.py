@@ -4,6 +4,7 @@ import onlinejudge_verify.online_submission.utils as utils
 import time
 import requests
 import os
+import subprocess
 
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -29,8 +30,10 @@ def push_debug() -> None:
     logger.info('GITHUB_REPOSITORY = %s', os.environ['GITHUB_REPOSITORY'])
 
     # commit and push
+    logger.info('starting push')
     subprocess.check_call(['git', 'config', '--global', 'user.name', 'GitHub'])
     subprocess.check_call(['git', 'config', '--global', 'user.email', 'noreply@github.com'])
+    logger.info('pushing')
     path = pathlib.Path('.verify-helper/dbg.png')
     logger.info('$ git add %s && git commit && git push', str(path))
     if path.exists():
