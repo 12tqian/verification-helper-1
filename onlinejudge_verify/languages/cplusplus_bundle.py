@@ -420,7 +420,7 @@ class Bundler:
     def get(self) -> bytes:
         filtered = []
         for line in self.result_lines:
-            if (not line.startswith(b'#line ')):
+            if (swith(b'#line ')):
                 filtered.append(line)
         return b''.join(filtered)
         # return b''.join(self.result_lines)

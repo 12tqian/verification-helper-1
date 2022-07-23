@@ -4,12 +4,17 @@ import requests
 
 import time
 
+
 def current_milli_time():
     return round(time.time() * 1000)
-judge = VJudge('vhelperoj', 'verificationpassword')
+
+
+judge = VJudge("vhelperoj", "verificationpassword")
 # problem = Problem('codeforces', '4A')
-problem_link = 'https://codeforces.com/problemset/problem/4/A'
-solution = Solution('C++', '''#include <bits/stdc++.h>
+problem_link = "https://codeforces.com/problemset/problem/4/A"
+solution = Solution(
+    "C++",
+    """#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -24,9 +29,7 @@ int main() {
         cout << "NO" << '\\n';
     }
     return 0; 
-}''')
+}""",
+)
 
 print(judge.submit_solution(problem_link, solution))
-
-
-    

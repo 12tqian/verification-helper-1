@@ -12,14 +12,18 @@ def wait_for_element(d, e_id, time=30):
 
 
 def wait_for_element_by_xpath(d, e_path, time=30):
-    return WebDriverWait(d, time).until(ec.presence_of_element_located((By.XPATH, e_path)))
+    return WebDriverWait(d, time).until(
+        ec.presence_of_element_located((By.XPATH, e_path))
+    )
 
 
 def wait_for_element_by_class(d, e_class, time=30):
     """
     Uses webdriver(d) to wait for page title(title) to become visible
     """
-    return WebDriverWait(d, time).until(ec.presence_of_element_located((By.CLASS_NAME, e_class)))
+    return WebDriverWait(d, time).until(
+        ec.presence_of_element_located((By.CLASS_NAME, e_class))
+    )
 
 
 def wait_for_page(d, title, time=30):
@@ -48,6 +52,6 @@ def field_send_keys(d, field, keys):
 
 
 def has_class(element, class_name):
-    classes = element.get_attribute('class')
+    classes = element.get_attribute("class")
 
     return class_name in classes
