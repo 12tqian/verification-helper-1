@@ -1,4 +1,4 @@
-import utils.util as util
+import utils
 import time
 import requests
 
