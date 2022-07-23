@@ -188,7 +188,6 @@ class VJudge:
                     (By.ID, 'submit-solution')
                 ))
                 element.send_keys(new_code)
-                driver.save_screenshot('basdf.asdf.png')
                 
                 # click submit
                 element = WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
