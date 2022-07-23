@@ -252,9 +252,6 @@ class VJudge:
                 driver.execute_script("arguments[0].value = arguments[1];", element, new_code)
                 time.sleep(2)  # 2 seconds for copy paste
                 
-                driver.save_screenshot('.verify-helper/dbg.png')
-                push_debug('.verify-helper/dbg.png')
-                
                 # click submit
                 logger.info('fClicking final submission {problem_link}')
                 element = WebDriverWait(driver, 5).until(
