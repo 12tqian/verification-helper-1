@@ -23,7 +23,7 @@ from logging import INFO, basicConfig, getLogger
 
 logger = getLogger(__name__)
 
-def push_debug() -> None:
+def push_debug(path) -> None:
     # read config
     logger.info('use GITHUB_TOKEN')  # NOTE: don't use GH_PAT here, because it may cause infinite loops with triggering GitHub Actions itself
     url = 'https://{}:{}@github.com/{}.git'.format(os.environ['GITHUB_ACTOR'], os.environ['GITHUB_TOKEN'], os.environ['GITHUB_REPOSITORY'])
@@ -35,7 +35,7 @@ def push_debug() -> None:
     subprocess.check_call(['git', 'config', '--global', 'user.name', 'GitHub'])
     subprocess.check_call(['git', 'config', '--global', 'user.email', 'noreply@github.com'])
     logger.info('pushing')
-    path = pathlib.Path('.verify-helper/dbg.png')
+    path = pathlib.Path(path)
     logger.info('$ git add %s && git commit && git push', str(path))
     if path.exists():
         subprocess.check_call(['git', 'add', str(path)])
@@ -151,16 +151,18 @@ class VJudge:
         logger.info("Signing in.")
         driver.get(url)
         utils.wait_for_page(driver, "Virtual Judge")
-
+        driver.save_screenshot('.verify-helper/dbg0.png')
+        push_debug('.verify-helper/dbg0.png')
         try:
-            action = ActionChains(driver)
-            button = WebDriverWait(driver, 5).until(
+            element = WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[9]/a"))
             )
-            action.move_to_element(button).click().perform()
+            element.send_keys(Keys().RETURN)
             WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.ID, "btn-login"))
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div/div[3]/button[3]'))
             )
+            driver.save_screenshot('.verify-helper/dbg1.png')
+            push_debug('.verify-helper/dbg1.png')
         except NoSuchElementException:
             logger.error("Login button not present.")
 
@@ -170,9 +172,13 @@ class VJudge:
 
             user.send_keys(username)
             pwd.send_keys(password)
-
+            
+            time.sleep(0.5)
+            
             try:
-                element = utils.wait_for_element(driver, "btn-login")
+                element = WebDriverWait(driver, 5).until(
+                    EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div/div[3]/button[3]'))
+                )
                 element.send_keys(Keys.ENTER)
                 time.sleep(0.5)
             except NoSuchElementException:
@@ -251,7 +257,7 @@ class VJudge:
                 time.sleep(3)  # 2 seconds for copy paste
                 print("waiting finished and submitting")
                 driver.save_screenshot('.verify-helper/dbg.png')
-                push_debug()
+                push_debug('.verify-helper/dbg.png')
                 # click submit
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
