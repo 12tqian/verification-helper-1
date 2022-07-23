@@ -225,7 +225,7 @@ class VJudge:
                 )
                 element.send_keys(new_code)
                 print("inserted code and waiting")
-                driver.implicitly_wait(2)  # 2 seconds for copy paste
+                time.sleep(3)  # 2 seconds for copy paste
                 print("waiting finished and submitting")
 
                 # click submit
