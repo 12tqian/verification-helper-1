@@ -195,6 +195,8 @@ class VJudge:
                     (By.ID, 'submit-solution')
                 ))
                 element.send_keys(new_code)
+                WebDriverWait(driver, 5).util(EC.text_to_be_present_in_element(
+                    (By.ID, 'submit-solution'), new_code))
                 
                 # click submit
                 element = WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
