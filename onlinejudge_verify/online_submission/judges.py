@@ -186,18 +186,18 @@ class VJudge:
                 logger.error("Error signing in.")
 
     def submit_solution(self, problem_link, solution):
-        if self.driver is None:
-            options = Options()
-            options.add_argument("--headless")
-            options.add_argument("--disable-gpu")  # Last I checked this was necessary.
+        options = Options()
+        options.add_argument("--headless")
+        options.add_argument("--disable-gpu")  # Last I checked this was necessary.
 
-            display = Display(visible=False, size=(800, 800)) # for some reason this is necessary
-            display.start()
-            # self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+        display = Display(visible=False, size=(800, 800)) # for some reason this is necessary
+        display.start()
+        # self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
 
-            self.driver = webdriver.Chrome(chrome_options=options)  # old version
+        self.driver = webdriver.Chrome(chrome_options=options)  # old version
 
         driver = self.driver
+        
         self.sign_in(driver, self.JUDGE_URL, self.username, self.password)
         logger.info("Successfully signed in.")
 
@@ -291,9 +291,11 @@ class VJudge:
                     text = text.split(" ")[0]
                     if self.check(text, self.GOOD_VERDICTS):
                         logger.info('{problem_link} was successful.')
+                        driver.quit()
                         return True
                     elif self.check(text, self.BAD_VERDICTS):
                         logger.info('{problem_link} failed.')
+                        driver.quit()
                         return False
 
                     time.sleep(3)
@@ -303,5 +305,5 @@ class VJudge:
             except:
                 retries += 1
                 driver.refresh()
-
+        driver.quit()
         return False
