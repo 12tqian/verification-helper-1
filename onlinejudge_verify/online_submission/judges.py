@@ -5,6 +5,7 @@ import time
 import requests
 import os
 import subprocess
+import pathlib
 
 from pyvirtualdisplay import Display
 from selenium import webdriver
