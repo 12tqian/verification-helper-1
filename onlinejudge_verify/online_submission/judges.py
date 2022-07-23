@@ -6,6 +6,7 @@ import requests
 
 from pyvirtualdisplay import Display
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -192,7 +193,7 @@ class VJudge:
                         )
                     )
                 )
-                element.click()
+                element.send_keys(Keys.ENTER)
                 print("clicked submission button")
                 # select language
                 print("selecting language")
@@ -233,7 +234,8 @@ class VJudge:
                         (By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]")
                     )
                 )
-                element.click()
+                element.send_keys(Keys.RETURN)
+                # element.click() 
                 print("clicked submit")
 
                 logger.info(f"Solution for {problem_link} submitted.")
