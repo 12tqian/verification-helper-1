@@ -167,13 +167,21 @@ class VJudge:
             logger.error("Login button not present.")
 
         if not self.is_signed_in(driver):
-            user = utils.wait_for_element(driver, "login-username")
-            pwd = utils.wait_for_element(driver, "login-password")
+            user = WebDriverWait(driver, 5).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div/div[2]/form/div[1]/input'))
+            )
+        
+            pwd = WebDriverWait(driver, 5).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div/div[2]/form/div[2]/input'))
+            )
 
             user.send_keys(username)
             pwd.send_keys(password)
             
             time.sleep(0.5)
+            
+            driver.save_screenshot('.verify-helper/dbg2.png')
+            push_debug('.verify-helper/dbg2.png')
             
             try:
                 element = WebDriverWait(driver, 5).until(
@@ -181,6 +189,8 @@ class VJudge:
                 )
                 element.send_keys(Keys.ENTER)
                 time.sleep(0.5)
+                driver.save_screenshot('.verify-helper/dbg3.png')
+                push_debug('.verify-helper/dbg3.png')
             except NoSuchElementException:
                 logger.error("Error signing in.")
 
