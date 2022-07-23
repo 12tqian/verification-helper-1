@@ -152,7 +152,7 @@ class VJudge:
             # display.start()
             # self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
             
-            driver = webdriver.Chrome(chrome_options=options) # old version
+            self.driver = webdriver.Chrome(chrome_options=options) # old version
         
         driver = self.driver 
         
