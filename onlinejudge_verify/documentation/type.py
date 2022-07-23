@@ -5,19 +5,20 @@ from typing import *
 
 
 class VerificationStatus(enum.Enum):
-    LIBRARY_ALL_AC = 'LIBRARY_ALL_AC'
-    LIBRARY_PARTIAL_AC = 'LIBRARY_PARTIAL_AC'
-    LIBRARY_SOME_WA = 'LIBRARY_SOME_WA'
-    LIBRARY_ALL_WA = 'LIBRARY_ALL_WA'
-    LIBRARY_NO_TESTS = 'LIBRARY_NO_TESTS'
-    TEST_ACCEPTED = 'TEST_ACCEPTED'
-    TEST_WRONG_ANSWER = 'TEST_WRONG_ANSWER'
-    TEST_WAITING_JUDGE = 'TEST_WAITING_JUDGE'
+    LIBRARY_ALL_AC = "LIBRARY_ALL_AC"
+    LIBRARY_PARTIAL_AC = "LIBRARY_PARTIAL_AC"
+    LIBRARY_SOME_WA = "LIBRARY_SOME_WA"
+    LIBRARY_ALL_WA = "LIBRARY_ALL_WA"
+    LIBRARY_NO_TESTS = "LIBRARY_NO_TESTS"
+    TEST_ACCEPTED = "TEST_ACCEPTED"
+    TEST_WRONG_ANSWER = "TEST_WRONG_ANSWER"
+    TEST_WAITING_JUDGE = "TEST_WAITING_JUDGE"
 
 
 class SourceCodeStat(NamedTuple):
     """A tuple represents a code file.
     """
+
     path: pathlib.Path  # a relative path from basedir
     is_verification_file: bool
     verification_status: VerificationStatus
@@ -29,11 +30,11 @@ class SourceCodeStat(NamedTuple):
 
 
 class FrontMatterItem(enum.Enum):
-    title = 'title'
-    layout = 'layout'
-    documentation_of = 'documentation_of'
-    data = 'data'
-    redirect_from = 'redirect_from'  # for jekyll-redirect-from plugin
+    title = "title"
+    layout = "layout"
+    documentation_of = "documentation_of"
+    data = "data"
+    redirect_from = "redirect_from"  # for jekyll-redirect-from plugin
 
 
 class PageRenderJob(NamedTuple):

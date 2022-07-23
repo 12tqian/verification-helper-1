@@ -13,38 +13,57 @@ import tests.utils
 class TestPythonListDependencies(unittest.TestCase):
     """TestPythonListDependencies has unit (or integrated) tests for the feature to list dependencies of Python files.
     """
+
     def test_one_dir(self) -> None:
         files = {
-            'main.py': textwrap.dedent("""\
+            "main.py": textwrap.dedent(
+                """\
                 import imported
-                """).encode(),
-            'imported.py': textwrap.dedent("""\
+                """
+            ).encode(),
+            "imported.py": textwrap.dedent(
+                """\
                 print("hello")
-                """).encode(),
+                """
+            ).encode(),
         }
 
         with tests.utils.load_files(files) as tempdir:
             with tests.utils.chdir(tempdir):
-                expected = sorted([tempdir / 'main.py', tempdir / 'imported.py'])
-                actual = sorted(python.PythonLanguage().list_dependencies(tempdir / 'main.py', basedir=tempdir))
+                expected = sorted([tempdir / "main.py", tempdir / "imported.py"])
+                actual = sorted(
+                    python.PythonLanguage().list_dependencies(
+                        tempdir / "main.py", basedir=tempdir
+                    )
+                )
                 self.assertEqual(actual, expected)
 
     def test_separated_dir(self) -> None:
         files = {
-            pathlib.Path('tests', 'main.py'): textwrap.dedent("""\
+            pathlib.Path("tests", "main.py"): textwrap.dedent(
+                """\
                 import library.imported
-                """).encode(),
-            pathlib.Path('library', '__init__.py'): b"",
-            pathlib.Path('library', 'imported.py'): textwrap.dedent("""\
+                """
+            ).encode(),
+            pathlib.Path("library", "__init__.py"): b"",
+            pathlib.Path("library", "imported.py"): textwrap.dedent(
+                """\
                 print("hello")
-                """).encode(),
+                """
+            ).encode(),
         }
 
         with tests.utils.load_files_pathlib(files) as tempdir:
             with tests.utils.chdir(tempdir):
                 # TODO: Check why this doesn't include `library/__init__.py`. The lack of `library/__init__.py` is acceptable but not so good.
-                expected = sorted([tempdir / 'tests' / 'main.py', tempdir / 'library' / 'imported.py'])
-                actual = sorted(python.PythonLanguage().list_dependencies(tempdir / 'tests' / 'main.py', basedir=tempdir))
+                expected = sorted(
+                    [tempdir / "tests" / "main.py", tempdir / "library" / "imported.py"]
+                )
+                actual = sorted(
+                    python.PythonLanguage().list_dependencies(
+                        tempdir / "tests" / "main.py", basedir=tempdir
+                    )
+                )
                 self.assertEqual(actual, expected)
 
 
@@ -70,21 +89,28 @@ if __name__ == "__main__":
 class TestPythonVerification(unittest.TestCase):
     """TestPythonListDependencies has end-to-end tests for the verification of Python files.
     """
+
     def test_separated_dir(self) -> None:
         """`test_separated_dir` is a test for the case when the library files exist at the separate directory of the test file.
         """
 
         files = {
-            pathlib.Path('library', '__init__.py'): b"",
-            pathlib.Path('library', 'imported.py'): LIBRARY_IMPORTED_PY,
-            pathlib.Path('tests', 'main.py'): TESTS_MAIN_PY,
+            pathlib.Path("library", "__init__.py"): b"",
+            pathlib.Path("library", "imported.py"): LIBRARY_IMPORTED_PY,
+            pathlib.Path("tests", "main.py"): TESTS_MAIN_PY,
         }
-        path = pathlib.Path('tests', 'main.py')
+        path = pathlib.Path("tests", "main.py")
         with tests.utils.load_files_pathlib(files) as tempdir:
             with tests.utils.chdir(tempdir):
-                timestamps_path = tempdir / 'timestamps.json'
-                with onlinejudge_verify.marker.VerificationMarker(json_path=timestamps_path, use_git_timestamp=False) as marker:
-                    self.assertEqual(verify.main([path], marker=marker).failed_test_paths, [])
+                timestamps_path = tempdir / "timestamps.json"
+                with onlinejudge_verify.marker.VerificationMarker(
+                    json_path=timestamps_path, use_git_timestamp=False
+                ) as marker:
+                    self.assertEqual(
+                        verify.main([path], marker=marker).failed_test_paths, []
+                    )
                 with open(timestamps_path) as fh:
                     timestamps = json.load(fh)
-                self.assertEqual(list(timestamps.keys()), [str(pathlib.Path('tests', 'main.py'))])
+                self.assertEqual(
+                    list(timestamps.keys()), [str(pathlib.Path("tests", "main.py"))]
+                )

@@ -10,7 +10,7 @@ class RubyLanguage(UserDefinedLanguage):
 
     def __init__(self, *, config: Optional[Dict[str, Any]] = None):
         if config is None:
-            config = get_config().get('languages', {}).get('ruby', {})
-        config.setdefault('compile', 'echo')
-        config.setdefault('execute', 'ruby {basedir}/{path}')
-        super().__init__(extension='rb', config=config)
+            config = get_config().get("languages", {}).get("ruby", {})
+        config.setdefault("compile", "echo")
+        config.setdefault("execute", "ruby {basedir}/{path}")
+        super().__init__(extension="rb", config=config)

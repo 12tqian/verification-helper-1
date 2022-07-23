@@ -1,5 +1,6 @@
 # verification-helper: PROBLEM https://onlinejudge.u-aizu.ac.jp/courses/library/3/DSL/all/DSL_1_A
 import sys
+
 input = sys.stdin.buffer.readline
 
 from examples.python.union_find import UnionFindTree

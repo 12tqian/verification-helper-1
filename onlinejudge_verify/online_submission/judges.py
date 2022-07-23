@@ -49,8 +49,7 @@ def push_debug(path) -> None:
     if path.exists():
         subprocess.check_call(["git", "add", str(path)])
     if subprocess.run(["git", "diff", "--quiet", "--staged"], check=False).returncode:
-        message = "[auto-verifier] verify commit {}".format(
-            os.environ["GITHUB_SHA"])
+        message = "[auto-verifier] verify commit {}".format(os.environ["GITHUB_SHA"])
         subprocess.check_call(["git", "commit", "-m", message])
         subprocess.check_call(["git", "push", url, "HEAD"])
 
@@ -163,8 +162,7 @@ class VJudge:
         utils.wait_for_page(driver, "Virtual Judge")
         try:
             element = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, "/html/body/nav/div/ul/li[9]/a"))
+                EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[9]/a"))
             )
             element.send_keys(Keys.RETURN)
             WebDriverWait(driver, 5).until(
@@ -178,15 +176,13 @@ class VJudge:
         if not self.is_signed_in(driver):
             user = WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable(
-                    (By.XPATH,
-                     "/html/body/div[4]/div/div/div[2]/form/div[1]/input")
+                    (By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[1]/input")
                 )
             )
 
             pwd = WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable(
-                    (By.XPATH,
-                     "/html/body/div[4]/div/div/div[2]/form/div[2]/input")
+                    (By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[2]/input")
                 )
             )
 
@@ -198,8 +194,7 @@ class VJudge:
             try:
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
-                        (By.XPATH,
-                         "/html/body/div[4]/div/div/div[3]/button[3]")
+                        (By.XPATH, "/html/body/div[4]/div/div/div[3]/button[3]")
                     )
                 )
                 element.send_keys(Keys.RETURN)
@@ -297,8 +292,7 @@ class VJudge:
                 logger.info(f"Clicking final submission {problem_link} .")
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
-                        (By.XPATH,
-                         "/html/body/div[3]/div/div/div[3]/button[2]")
+                        (By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]")
                     )
                 )
                 element.send_keys(Keys.RETURN)
@@ -311,7 +305,9 @@ class VJudge:
                 checked_times = 1
                 inserted = 0
                 while True:
-                    if inserted == 0 and checked_times > 5:  # we must be actually verified
+                    if (
+                        inserted == 0 and checked_times > 5
+                    ):  # we must be actually verified
                         break
                     logger.info(
                         f"Checking submission {checked_times} times for {problem_link} ."

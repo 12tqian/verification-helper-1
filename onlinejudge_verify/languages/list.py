@@ -24,28 +24,41 @@ def _get_dict() -> Dict[str, Language]:
     global _dict  # pylint: disable=invalid-name
     if _dict is None:
         _dict = {}
-        _dict['.cpp'] = CPlusPlusLanguage()
-        _dict['.hpp'] = _dict['.cpp']
-        _dict['.cc'] = _dict['.cpp']
-        _dict['.h'] = _dict['.cpp']
-        _dict['.csx'] = CSharpScriptLanguage()
-        _dict['.nim'] = NimLanguage()
-        _dict['.py'] = PythonLanguage()
-        _dict['.hs'] = HaskellLanguage()
-        _dict['.ruby'] = RubyLanguage()
-        _dict['.go'] = GoLanguage()
-        _dict['.java'] = JavaLanguage()
-        _dict['.rs'] = RustLanguage()
+        _dict[".cpp"] = CPlusPlusLanguage()
+        _dict[".hpp"] = _dict[".cpp"]
+        _dict[".cc"] = _dict[".cpp"]
+        _dict[".h"] = _dict[".cpp"]
+        _dict[".csx"] = CSharpScriptLanguage()
+        _dict[".nim"] = NimLanguage()
+        _dict[".py"] = PythonLanguage()
+        _dict[".hs"] = HaskellLanguage()
+        _dict[".ruby"] = RubyLanguage()
+        _dict[".go"] = GoLanguage()
+        _dict[".java"] = JavaLanguage()
+        _dict[".rs"] = RustLanguage()
 
-        for ext, config in get_config().get('languages', {}).items():
-            if '.' + ext in _dict:
-                if not isinstance(_dict['.' + ext], UserDefinedLanguage):
-                    for key in ('compile', 'execute', 'bundle', 'list_attributes', 'list_dependencies'):
+        for ext, config in get_config().get("languages", {}).items():
+            if "." + ext in _dict:
+                if not isinstance(_dict["." + ext], UserDefinedLanguage):
+                    for key in (
+                        "compile",
+                        "execute",
+                        "bundle",
+                        "list_attributes",
+                        "list_dependencies",
+                    ):
                         if key in config:
-                            raise RuntimeError("You cannot overwrite existing language: .{}".format(ext))
+                            raise RuntimeError(
+                                "You cannot overwrite existing language: .{}".format(
+                                    ext
+                                )
+                            )
             else:
-                logger.warning("config.toml: languages.%s: Adding new languages using `config.toml` is supported but not recommended. Please consider making pull requests for your languages, see https://github.com/kmyk/online-judge-verify-helper/issues/116", ext)
-                _dict['.' + ext] = UserDefinedLanguage(extension=ext, config=config)
+                logger.warning(
+                    "config.toml: languages.%s: Adding new languages using `config.toml` is supported but not recommended. Please consider making pull requests for your languages, see https://github.com/kmyk/online-judge-verify-helper/issues/116",
+                    ext,
+                )
+                _dict["." + ext] = UserDefinedLanguage(extension=ext, config=config)
     return _dict
 
 

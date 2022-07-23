@@ -10,7 +10,7 @@ class HaskellLanguage(UserDefinedLanguage):
 
     def __init__(self, *, config: Optional[Dict[str, Any]] = None):
         if config is None:
-            config = get_config().get('languages', {}).get('haskell', {})
-        config.setdefault('compile', 'echo')
-        config.setdefault('execute', 'runghc {basedir}/{path}')
-        super().__init__(extension='hs', config=config)
+            config = get_config().get("languages", {}).get("haskell", {})
+        config.setdefault("compile", "echo")
+        config.setdefault("execute", "runghc {basedir}/{path}")
+        super().__init__(extension="hs", config=config)

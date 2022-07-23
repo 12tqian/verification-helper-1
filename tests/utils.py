@@ -8,7 +8,7 @@ from typing import *
 def load_files(files: Dict[str, bytes]) -> ContextManager[pathlib.Path]:
     files_ = {}
     for relpath, data in files.items():
-        assert '/' not in relpath and '\\' not in relpath  # we should use pathlib
+        assert "/" not in relpath and "\\" not in relpath  # we should use pathlib
         files_[pathlib.Path(relpath)] = data
     return load_files_pathlib(files_)
 

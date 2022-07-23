@@ -1,5 +1,6 @@
 # verification-helper: PROBLEM https://judge.yosupo.jp/problem/unionfind
 import sys
+
 input = sys.stdin.buffer.readline
 
 from examples.python.union_find import UnionFindTree

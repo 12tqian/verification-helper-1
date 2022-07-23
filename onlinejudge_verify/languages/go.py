@@ -10,7 +10,7 @@ class GoLanguage(UserDefinedLanguage):
 
     def __init__(self, *, config: Optional[Dict[str, Any]] = None):
         if config is None:
-            config = get_config().get('languages', {}).get('go', {})
-        config.setdefault('compile', 'echo')
-        config.setdefault('execute', 'go run {basedir}/{path}')
-        super().__init__(extension='go', config=config)
+            config = get_config().get("languages", {}).get("go", {})
+        config.setdefault("compile", "echo")
+        config.setdefault("execute", "go run {basedir}/{path}")
+        super().__init__(extension="go", config=config)

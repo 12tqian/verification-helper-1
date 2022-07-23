@@ -14,12 +14,14 @@ from onlinejudge_verify.marker import VerificationMarker
 logger = getLogger(__name__)
 
 
-def _find_matched_file_paths(pred: Callable[[pathlib.Path], bool], *, basedir: pathlib.Path) -> List[pathlib.Path]:
+def _find_matched_file_paths(
+    pred: Callable[[pathlib.Path], bool], *, basedir: pathlib.Path
+) -> List[pathlib.Path]:
     found: List[pathlib.Path] = []
 
     def dfs(x: pathlib.Path) -> None:
         for y in x.iterdir():
-            if y.name.startswith('.'):
+            if y.name.startswith("."):
                 continue
             if y.is_dir():
                 dfs(y)
@@ -40,12 +42,18 @@ def _find_source_code_paths(*, basedir: pathlib.Path) -> List[pathlib.Path]:
 
 def find_markdown_paths(*, basedir: pathlib.Path) -> List[pathlib.Path]:
     def pred(path: pathlib.Path) -> bool:
-        return path.suffix == '.md'
+        return path.suffix == ".md"
 
     return _find_matched_file_paths(pred, basedir=basedir)
 
 
-def _build_dependency_graph(paths: List[pathlib.Path], *, basedir: pathlib.Path) -> Tuple[Dict[pathlib.Path, List[pathlib.Path]], Dict[pathlib.Path, List[pathlib.Path]], Dict[pathlib.Path, List[pathlib.Path]]]:
+def _build_dependency_graph(
+    paths: List[pathlib.Path], *, basedir: pathlib.Path
+) -> Tuple[
+    Dict[pathlib.Path, List[pathlib.Path]],
+    Dict[pathlib.Path, List[pathlib.Path]],
+    Dict[pathlib.Path, List[pathlib.Path]],
+]:
     """
     :returns: graphs from absolute paths to relative paths
     """
@@ -63,14 +71,18 @@ def _build_dependency_graph(paths: List[pathlib.Path], *, basedir: pathlib.Path)
     # build the graph
     for src in paths:
         absolute_src = (basedir / src).resolve()
-        relative_src = absolute_src.relative_to(basedir)  # all paths must be in the git repository
+        relative_src = absolute_src.relative_to(
+            basedir
+        )  # all paths must be in the git repository
         language = onlinejudge_verify.languages.list.get(src)
         assert language is not None
 
         try:
             dependencies = language.list_dependencies(src, basedir=basedir)
         except Exception as e:
-            logger.exception('failed to list dependencies of %s: %s', str(relative_src), e)
+            logger.exception(
+                "failed to list dependencies of %s: %s", str(relative_src), e
+            )
             continue
 
         for dst in dependencies:
@@ -79,7 +91,11 @@ def _build_dependency_graph(paths: List[pathlib.Path], *, basedir: pathlib.Path)
             if absolute_src == absolute_dst:
                 continue
             if absolute_dst not in depends_on:
-                logger.debug("The file `%s` which is depended from `%s` is ignored because it's not listed as a source code file.", relative_dst, relative_src)
+                logger.debug(
+                    "The file `%s` which is depended from `%s` is ignored because it's not listed as a source code file.",
+                    relative_dst,
+                    relative_src,
+                )
                 continue
 
             depends_on[absolute_src].append(relative_dst)
@@ -91,7 +107,13 @@ def _build_dependency_graph(paths: List[pathlib.Path], *, basedir: pathlib.Path)
     return depends_on, required_by, verified_with
 
 
-def _build_verification_status(paths: List[pathlib.Path], *, verified_with: Dict[pathlib.Path, List[pathlib.Path]], basedir: pathlib.Path, marker: VerificationMarker) -> Dict[pathlib.Path, VerificationStatus]:
+def _build_verification_status(
+    paths: List[pathlib.Path],
+    *,
+    verified_with: Dict[pathlib.Path, List[pathlib.Path]],
+    basedir: pathlib.Path,
+    marker: VerificationMarker,
+) -> Dict[pathlib.Path, VerificationStatus]:
     """
     :returns: mapping from absolute paths to verification status
     """
@@ -115,12 +137,18 @@ def _build_verification_status(paths: List[pathlib.Path], *, verified_with: Dict
         if not utils.is_verification_file(path, basedir=basedir):
             status_list = []
             for verification_path in verified_with[absolute_path]:
-                status_list.append(verification_status[(basedir / verification_path).resolve()])
+                status_list.append(
+                    verification_status[(basedir / verification_path).resolve()]
+                )
             if not status_list:
                 status = VerificationStatus.LIBRARY_NO_TESTS
-            elif status_list.count(VerificationStatus.TEST_ACCEPTED) == len(status_list):
+            elif status_list.count(VerificationStatus.TEST_ACCEPTED) == len(
+                status_list
+            ):
                 status = VerificationStatus.LIBRARY_ALL_AC
-            elif status_list.count(VerificationStatus.TEST_WRONG_ANSWER) == len(status_list):
+            elif status_list.count(VerificationStatus.TEST_WRONG_ANSWER) == len(
+                status_list
+            ):
                 status = VerificationStatus.LIBRARY_ALL_WA
             elif VerificationStatus.TEST_WRONG_ANSWER in status_list:
                 status = VerificationStatus.LIBRARY_SOME_WA
@@ -151,7 +179,7 @@ def _get_source_code_stat(
     try:
         attributes = language.list_attributes(path, basedir=basedir)
     except Exception as e:
-        logger.exception('failed to list attributes of %s: %s', str(relative_path), e)
+        logger.exception("failed to list attributes of %s: %s", str(relative_path), e)
         attributes = {}
 
     return SourceCodeStat(
@@ -166,10 +194,16 @@ def _get_source_code_stat(
     )
 
 
-def generate_source_code_stats(*, marker: VerificationMarker, basedir: pathlib.Path) -> List[SourceCodeStat]:
+def generate_source_code_stats(
+    *, marker: VerificationMarker, basedir: pathlib.Path
+) -> List[SourceCodeStat]:
     source_code_paths = _find_source_code_paths(basedir=basedir)
-    depends_on, required_by, verified_with = _build_dependency_graph(source_code_paths, basedir=basedir)
-    verification_status = _build_verification_status(source_code_paths, verified_with=verified_with, basedir=basedir, marker=marker)
+    depends_on, required_by, verified_with = _build_dependency_graph(
+        source_code_paths, basedir=basedir
+    )
+    verification_status = _build_verification_status(
+        source_code_paths, verified_with=verified_with, basedir=basedir, marker=marker
+    )
     source_code_stats: List[SourceCodeStat] = []
     for path in source_code_paths:
         stat = _get_source_code_stat(
@@ -185,18 +219,26 @@ def generate_source_code_stats(*, marker: VerificationMarker, basedir: pathlib.P
     return sorted(source_code_stats, key=lambda stat: stat.path)
 
 
-def is_excluded(relative_path: pathlib.Path, *, excluded_paths: List[pathlib.Path]) -> bool:
+def is_excluded(
+    relative_path: pathlib.Path, *, excluded_paths: List[pathlib.Path]
+) -> bool:
     for excluded in excluded_paths:
         if relative_path == excluded or excluded in relative_path.parents:
             return True
     return False
 
 
-def apply_exclude_list_to_paths(paths: List[pathlib.Path], *, excluded_paths: List[pathlib.Path]) -> List[pathlib.Path]:
-    return [path for path in paths if not is_excluded(path, excluded_paths=excluded_paths)]
+def apply_exclude_list_to_paths(
+    paths: List[pathlib.Path], *, excluded_paths: List[pathlib.Path]
+) -> List[pathlib.Path]:
+    return [
+        path for path in paths if not is_excluded(path, excluded_paths=excluded_paths)
+    ]
 
 
-def apply_exclude_list_to_stats(*, excluded_paths: List[pathlib.Path], source_code_stats: List[SourceCodeStat]) -> List[SourceCodeStat]:
+def apply_exclude_list_to_stats(
+    *, excluded_paths: List[pathlib.Path], source_code_stats: List[SourceCodeStat]
+) -> List[SourceCodeStat]:
     result = []
     for stat in source_code_stats:
         if is_excluded(stat.path, excluded_paths=excluded_paths):
@@ -205,9 +247,15 @@ def apply_exclude_list_to_stats(*, excluded_paths: List[pathlib.Path], source_co
             path=stat.path,
             is_verification_file=stat.is_verification_file,
             timestamp=stat.timestamp,
-            depends_on=apply_exclude_list_to_paths(stat.depends_on, excluded_paths=excluded_paths),
-            required_by=apply_exclude_list_to_paths(stat.required_by, excluded_paths=excluded_paths),
-            verified_with=apply_exclude_list_to_paths(stat.verified_with, excluded_paths=excluded_paths),
+            depends_on=apply_exclude_list_to_paths(
+                stat.depends_on, excluded_paths=excluded_paths
+            ),
+            required_by=apply_exclude_list_to_paths(
+                stat.required_by, excluded_paths=excluded_paths
+            ),
+            verified_with=apply_exclude_list_to_paths(
+                stat.verified_with, excluded_paths=excluded_paths
+            ),
             verification_status=stat.verification_status,
             attributes=stat.attributes,
         )
@@ -215,20 +263,27 @@ def apply_exclude_list_to_stats(*, excluded_paths: List[pathlib.Path], source_co
     return result
 
 
-def resolve_documentation_of(documentation_of: str, *, markdown_path: pathlib.Path, basedir: pathlib.Path) -> Optional[pathlib.Path]:
-    if documentation_of.startswith('.'):
+def resolve_documentation_of(
+    documentation_of: str, *, markdown_path: pathlib.Path, basedir: pathlib.Path
+) -> Optional[pathlib.Path]:
+    if documentation_of.startswith("."):
         # a relative path
-        path = markdown_path.parent / pathlib.Path(pathlib.PurePosixPath(documentation_of))
+        path = markdown_path.parent / pathlib.Path(
+            pathlib.PurePosixPath(documentation_of)
+        )
         if path.exists() and basedir in path.resolve().parents:
             return path
-    elif documentation_of.startswith('//'):
+    elif documentation_of.startswith("//"):
         # from the document root
         path = basedir / pathlib.Path(pathlib.PurePosixPath(documentation_of[2:]))
         if path.exists() and basedir in path.resolve().parents:
             return path
 
     # guessing
-    logger.warning('No file at the expected path from the `documentation_of` path. The `documentation_of` path should use `/` for path separator, and start with `.` for a relative path from the path of the Markdown file, or start with `//` for a absolute path from the root of the repository.: %s', documentation_of)
+    logger.warning(
+        "No file at the expected path from the `documentation_of` path. The `documentation_of` path should use `/` for path separator, and start with `.` for a relative path from the path of the Markdown file, or start with `//` for a absolute path from the root of the repository.: %s",
+        documentation_of,
+    )
     candidate_paths = [
         basedir / pathlib.Path(pathlib.PurePosixPath(documentation_of)),
         basedir / pathlib.Path(documentation_of),
@@ -241,7 +296,12 @@ def resolve_documentation_of(documentation_of: str, *, markdown_path: pathlib.Pa
     return None
 
 
-def convert_to_page_render_jobs(*, source_code_stats: List[SourceCodeStat], markdown_paths: List[pathlib.Path], site_render_config: SiteRenderConfig) -> List[PageRenderJob]:
+def convert_to_page_render_jobs(
+    *,
+    source_code_stats: List[SourceCodeStat],
+    markdown_paths: List[pathlib.Path],
+    site_render_config: SiteRenderConfig,
+) -> List[PageRenderJob]:
     basedir = site_render_config.basedir
 
     page_render_jobs: Dict[pathlib.Path, PageRenderJob] = {}
@@ -251,33 +311,44 @@ def convert_to_page_render_jobs(*, source_code_stats: List[SourceCodeStat], mark
         markdown_absolute_path = (basedir / markdown_path).resolve()
         markdown_relative_path = markdown_absolute_path.relative_to(basedir)
 
-        with open(markdown_path, 'rb') as fh:
+        with open(markdown_path, "rb") as fh:
             content = fh.read()
-        front_matter, content = onlinejudge_verify.documentation.front_matter.split_front_matter(content)
+        (
+            front_matter,
+            content,
+        ) = onlinejudge_verify.documentation.front_matter.split_front_matter(content)
 
         # move the location if documentation_of field exists
         path = markdown_relative_path
         documentation_of = front_matter.get(FrontMatterItem.documentation_of.value)
         if documentation_of is not None:
-            documentation_of_path = resolve_documentation_of(documentation_of, markdown_path=path, basedir=basedir)
+            documentation_of_path = resolve_documentation_of(
+                documentation_of, markdown_path=path, basedir=basedir
+            )
             if documentation_of_path is None:
-                logger.warning('the `documentation_of` path of %s is not found: %s', str(path), documentation_of)
+                logger.warning(
+                    "the `documentation_of` path of %s is not found: %s",
+                    str(path),
+                    documentation_of,
+                )
                 del front_matter[FrontMatterItem.documentation_of.value]
                 continue
-            documentation_of_relative_path = documentation_of_path.resolve().relative_to(basedir)
-            front_matter[FrontMatterItem.documentation_of.value] = str(documentation_of_relative_path)
-            path = documentation_of_relative_path.parent / (documentation_of_path.name + '.md')
+            documentation_of_relative_path = documentation_of_path.resolve().relative_to(
+                basedir
+            )
+            front_matter[FrontMatterItem.documentation_of.value] = str(
+                documentation_of_relative_path
+            )
+            path = documentation_of_relative_path.parent / (
+                documentation_of_path.name + ".md"
+            )
 
-        job = PageRenderJob(
-            path=path,
-            front_matter=front_matter,
-            content=content,
-        )
+        job = PageRenderJob(path=path, front_matter=front_matter, content=content,)
         page_render_jobs[job.path] = job
 
     # API pages
     for stat in source_code_stats:
-        path = stat.path.parent / (stat.path.name + '.md')
+        path = stat.path.parent / (stat.path.name + ".md")
         if path in page_render_jobs:
             continue
 
@@ -285,45 +356,50 @@ def convert_to_page_render_jobs(*, source_code_stats: List[SourceCodeStat], mark
         front_matter[FrontMatterItem.documentation_of.value] = str(stat.path)
 
         # add redirects from old URLs
-        old_directory = 'verify' if stat.is_verification_file else 'library'
+        old_directory = "verify" if stat.is_verification_file else "library"
         front_matter[FrontMatterItem.redirect_from.value] = [
-            '/' + str(pathlib.Path(old_directory) / stat.path),
-            '/' + str(pathlib.Path(old_directory) / stat.path.parent / (stat.path.name + '.html')),
+            "/" + str(pathlib.Path(old_directory) / stat.path),
+            "/"
+            + str(
+                pathlib.Path(old_directory)
+                / stat.path.parent
+                / (stat.path.name + ".html")
+            ),
         ]
 
         # add title specified as a attributes like @title or @brief
         front_matter[FrontMatterItem.title.value] = str(stat.path)
-        if 'document_title' in stat.attributes:
-            front_matter[FrontMatterItem.title.value] = stat.attributes['document_title']
+        if "document_title" in stat.attributes:
+            front_matter[FrontMatterItem.title.value] = stat.attributes[
+                "document_title"
+            ]
 
         # treat @docs path/to.md directives
-        content = b''
-        if '_deprecated_at_docs' in stat.attributes:
-            at_docs_path = pathlib.Path(stat.attributes['_deprecated_at_docs'])
+        content = b""
+        if "_deprecated_at_docs" in stat.attributes:
+            at_docs_path = pathlib.Path(stat.attributes["_deprecated_at_docs"])
             try:
-                with open(at_docs_path, 'rb') as fh:
+                with open(at_docs_path, "rb") as fh:
                     content = fh.read()
             except FileNotFoundError as e:
-                logger.exception('failed to read markdown file specified by @docs in %s: %s', str(stat.path), e)
+                logger.exception(
+                    "failed to read markdown file specified by @docs in %s: %s",
+                    str(stat.path),
+                    e,
+                )
 
-        job = PageRenderJob(
-            path=path,
-            front_matter=front_matter,
-            content=content,
-        )
+        job = PageRenderJob(path=path, front_matter=front_matter, content=content,)
         page_render_jobs[job.path] = job
 
     # top page
-    if pathlib.Path('index.md') not in page_render_jobs:
-        content = b''
+    if pathlib.Path("index.md") not in page_render_jobs:
+        content = b""
         if site_render_config.index_md.exists():
-            with site_render_config.index_md.open('rb') as fh:
+            with site_render_config.index_md.open("rb") as fh:
                 content = fh.read()
         job = PageRenderJob(
-            path=pathlib.Path('index.md'),
-            front_matter={
-                'layout': 'toppage',
-            },
+            path=pathlib.Path("index.md"),
+            front_matter={"layout": "toppage",},
             content=content,
         )
         page_render_jobs[job.path] = job
