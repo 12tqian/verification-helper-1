@@ -157,7 +157,7 @@ class VJudge:
             element = WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[9]/a"))
             )
-            element.send_keys(Keys().RETURN)
+            element.send_keys(Keys.RETURN)
             WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div/div[3]/button[3]'))
             )
@@ -187,7 +187,7 @@ class VJudge:
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div/div[3]/button[3]'))
                 )
-                element.send_keys(Keys.ENTER)
+                element.send_keys(Keys.RETURN)
                 time.sleep(0.5)
                 driver.save_screenshot('.verify-helper/dbg3.png')
                 push_debug('.verify-helper/dbg3.png')
