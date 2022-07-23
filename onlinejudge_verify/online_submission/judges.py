@@ -290,10 +290,10 @@ class VJudge:
                         text = ""
                     text = text.split(" ")[0]
                     if self.check(text, self.GOOD_VERDICTS):
-                        driver.quit()
+                        logger.info('{problem_link} was successful.')
                         return True
                     elif self.check(text, self.BAD_VERDICTS):
-                        driver.quit()
+                        logger.info('{problem_link} failed.')
                         return False
 
                     time.sleep(3)
@@ -304,5 +304,4 @@ class VJudge:
                 retries += 1
                 driver.refresh()
 
-        driver.quit()
         return False

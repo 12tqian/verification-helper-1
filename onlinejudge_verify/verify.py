@@ -203,5 +203,6 @@ def main(paths: List[pathlib.Path], *, marker: onlinejudge_verify.marker.Verific
         # to prevent taking too long; we may fail to use the results of verification due to expired tokens
         if timeout is not None and time.time() - start > timeout:
             break
-
+        
+    vjudge.driver.quit()
     return VerificationSummary(failed_test_paths=failed_test_paths)
