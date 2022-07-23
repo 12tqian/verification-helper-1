@@ -1,4 +1,5 @@
 import onlinejudge_verify.online_submission.utils
+# import utils # for some reason this doesn't work...
 import time
 import requests
 
@@ -69,6 +70,7 @@ class VJudge:
     def __init__(self, username = "", password = ""):
         self.username = username
         self.password = password
+        self.driver = None
 
     def get_vjudge_problem_link(self, problem_link):
         judge_name = ''
@@ -104,7 +106,7 @@ class VJudge:
     def sign_in(self, driver, url, username, password):
         logger.info('Signing in.')
         driver.get(url)
-        util.wait_for_page(driver, 'Virtual Judge')
+        utils.wait_for_page(driver, 'Virtual Judge')
         
         try:
             action = ActionChains(driver)
@@ -119,29 +121,32 @@ class VJudge:
             logger.error('Login button not present.')
         
         if not self.is_signed_in(driver):
-            user = util.wait_for_element(driver, "login-username")
-            pwd = util.wait_for_element(driver, "login-password")
+            user = utils.wait_for_element(driver, "login-username")
+            pwd = utils.wait_for_element(driver, "login-password")
 
             user.send_keys(username)
             pwd.send_keys(password)
 
             try:
                 action = ActionChains(driver)
-                button = util.wait_for_element(driver, 'btn-login')
+                button = utils.wait_for_element(driver, 'btn-login')
                 action.move_to_element(button).click().perform()
                 WebDriverWait(driver, 5).until(EC.staleness_of(button))
             except NoSuchElementException:
                 logger.error('Error signing in.')
                 
     def submit_solution(self, problem_link, solution): 
-        options = Options()
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')  # Last I checked this was necessary.
+        if self.driver is None:
+            options = Options()
+            options.add_argument('--headless')
+            options.add_argument('--disable-gpu')  # Last I checked this was necessary.
+            
+            display = Display(visible=False, size=(800, 800)) # for some reason this is necessary
+            display.start()
+            
+            self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
         
-        display = Display(visible=False, size=(800, 800)) # for some reason this is necessary
-        display.start()
-        
-        driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+        driver = self.driver 
         # driver = webdriver.Chrome(chrome_options=options) # old version
         
         self.sign_in(driver, self.JUDGE_URL, self.username, self.password)
