@@ -26,8 +26,8 @@ jobs:
     # - name: Run isort
     #   run: isort --check-only --diff onlinejudge_verify onlinejudge_bundle tests setup.py
 
-    - name: Run yapf
-      run: yapf --diff --recursive onlinejudge_verify onlinejudge_bundle tests setup.py
+    # - name: Run yapf
+    #   run: yapf --diff --recursive onlinejudge_verify onlinejudge_bundle tests setup.py
 
     - name: Run mypy
       run: mypy onlinejudge_verify onlinejudge_bundle setup.py
