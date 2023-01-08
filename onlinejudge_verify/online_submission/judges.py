@@ -2,21 +2,16 @@ import onlinejudge_verify.online_submission.utils as utils
 
 # import utils # for some reason this doesn't work...
 import time
-import requests
 import os
 import subprocess
 import pathlib
 
-from pyvirtualdisplay import Display
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.action_chains import ActionChains
-from webdriver_manager.chrome import ChromeDriverManager
 import colorlog
 
 from logging import INFO, basicConfig, getLogger
@@ -58,7 +53,7 @@ class VJudge:
     JUDGE_NAME = "vjudge"
     JUDGE_URL = "https://vjudge.net/"
     PROBLEM_URL = "https://vjudge.net/problem/"
-    GOOD_VERDICTS = ["Accepted"]
+    GOOD_VERDICTS = ["Accepted", "Happy"]
     BAD_VERDICTS = [
         "Time",
         "Wrong",
@@ -164,7 +159,7 @@ class VJudge:
             element = WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable((By.XPATH, "/html/body/nav/div/ul/li[9]/a"))
             )
-            element.send_keys(Keys.RETURN)
+            element.click()
             WebDriverWait(driver, 5).until(
                 EC.element_to_be_clickable(
                     (By.XPATH, "/html/body/div[4]/div/div/div[3]/button[3]")
@@ -185,8 +180,10 @@ class VJudge:
                     (By.XPATH, "/html/body/div[4]/div/div/div[2]/form/div[2]/input")
                 )
             )
-
+            user.click()
             user.send_keys(username)
+
+            pwd.click()
             pwd.send_keys(password)
 
             time.sleep(0.5)
@@ -197,24 +194,18 @@ class VJudge:
                         (By.XPATH, "/html/body/div[4]/div/div/div[3]/button[3]")
                     )
                 )
-                element.send_keys(Keys.RETURN)
+                element.click()
                 time.sleep(0.5)
             except NoSuchElementException:
                 logger.error("Error signing in.")
 
     def submit_solution(self, problem_link, solution):
         options = Options()
-        options.add_argument("--headless")
+        # options.add_argument("--headless")
         # Last I checked this was necessary.
         options.add_argument("--disable-gpu")
 
-        display = Display(
-            visible=False, size=(800, 800)
-        )  # for some reason this is necessary
-        display.start()
-        # self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
-
-        self.driver = webdriver.Chrome(chrome_options=options)  # old version
+        self.driver = webdriver.Chrome(chrome_options=options)  
 
         driver = self.driver
 
@@ -242,7 +233,7 @@ class VJudge:
                         )
                     )
                 )
-                element.send_keys(Keys.RETURN)
+                element.click()
 
                 # select language
                 logger.info(f"Selecting language for {problem_link} .")
@@ -250,11 +241,12 @@ class VJudge:
                     EC.element_to_be_clickable(
                         (
                             By.XPATH,
-                            "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div[2]/div/select",
+                            "/html/body/div[3]/div/div/div[2]/form/div/div[8]/div/select",
                         )
                     )
                 )
                 value = self.JUDGE_LANGUAGE_VALUE[judge_name][solution.language]
+                element.click()
                 driver.execute_script(
                     """
                                         var select = arguments[0]; 
@@ -279,10 +271,11 @@ class VJudge:
                     EC.element_to_be_clickable(
                         (
                             By.XPATH,
-                            "/html/body/div[3]/div/div/div[2]/form/div/div[4]/div[4]/div/textarea",
+                            "/html/body/div[3]/div/div/div[2]/form/div/div[9]/div/textarea",
                         )
                     )
                 )
+                element.click()
                 driver.execute_script(
                     "arguments[0].value = arguments[1];", element, new_code
                 )
@@ -295,7 +288,7 @@ class VJudge:
                         (By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]")
                     )
                 )
-                element.send_keys(Keys.RETURN)
+                element.click()
 
                 logger.info(f"Solution for {problem_link} submitted.")
 
