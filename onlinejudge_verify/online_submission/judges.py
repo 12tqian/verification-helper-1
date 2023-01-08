@@ -205,7 +205,7 @@ class VJudge:
         # Last I checked this was necessary.
         options.add_argument("--disable-gpu")
 
-        self.driver = webdriver.Chrome(chrome_options=options)  
+        self.driver = webdriver.Chrome(chrome_options=options)
 
         driver = self.driver
 
