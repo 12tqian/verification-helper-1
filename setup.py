@@ -19,7 +19,7 @@ setup(
         "importlab",
         "mechanize",
         "selenium",
-        "py" "logging",
+        "pylogging",
         "pyvirtualdisplay",
         "webdriver_manager",
     ],
