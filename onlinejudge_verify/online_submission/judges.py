@@ -119,7 +119,7 @@ class VJudge:
 
     def get_vjudge_problem_link(self, problem_link):
         judge_name = ""
-        for marker in self.JUDGE_MARKER.keys():
+        for marker in self.JUDGE_MARKER:
             if marker in problem_link:
                 judge_name = self.JUDGE_MARKER[marker]
                 break
@@ -134,7 +134,7 @@ class VJudge:
                 add = lst[-3] + lst[-1]
             else:
                 add = lst[-2] + lst[-1]
-        elif judge_name == "atcoder" or judge_name == "spoj" or judge_name == "kattis":
+        elif judge_name in ("atcoder", "spoj", "kattis"):
             add = lst[-1]
         if judge_name == "atcoder":
             add = add.split("?")[0]  # get rid of language extension
@@ -214,17 +214,17 @@ class VJudge:
 
         judge_name, submission_url = self.get_vjudge_problem_link(problem_link)
 
-        MAX_RETRIES = 5
+        max_retries = 6
         retries = 1
 
-        while retries <= MAX_RETRIES:
-            logger.info(f"Trying ({retries}) times.")
+        while retries <= max_retries:
+            logger.info("Trying (%d) times.", retries)
             try:
-                logger.info(f"Navigating to {submission_url} .")
+                logger.info("Navigating to %s .", submission_url)
                 driver.get(submission_url)
 
                 # click submit button
-                logger.info(f"Clicking submit buttton for {problem_link} .")
+                logger.info("Clicking submit buttton for %s .", problem_link)
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
                         (
@@ -236,7 +236,7 @@ class VJudge:
                 element.click()
 
                 # select language
-                logger.info(f"Selecting language for {problem_link} .")
+                logger.info("Selecting language for %s .", problem_link)
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
                         (
@@ -249,11 +249,11 @@ class VJudge:
                 element.click()
                 driver.execute_script(
                     """
-                                        var select = arguments[0]; 
-                                        for (var i = 0; i < select.options.length; i++) { 
-                                            if (select.options[i].value == arguments[1]) { 
-                                                select.options[i].selected = true; 
-                                            } 
+                                        var select = arguments[0];
+                                        for (var i = 0; i < select.options.length; i++) {
+                                            if (select.options[i].value == arguments[1]) {
+                                                select.options[i].selected = true;
+                                            }
                                         }""",
                     element,
                     value,
@@ -261,7 +261,7 @@ class VJudge:
                 time.sleep(0.5)
 
                 # insert code
-                logger.info(f"Inputting code for {problem_link}.")
+                logger.info("Inputting code for %s .", problem_link)
                 new_code = (
                     solution.solution_code
                     + "\n// "
@@ -282,7 +282,7 @@ class VJudge:
                 time.sleep(2)  # 2 seconds for copy paste
 
                 # click submit
-                logger.info(f"Clicking final submission {problem_link} .")
+                logger.info("Clicking final submission %s .", problem_link)
                 element = WebDriverWait(driver, 5).until(
                     EC.element_to_be_clickable(
                         (By.XPATH, "/html/body/div[3]/div/div/div[3]/button[2]")
@@ -290,7 +290,7 @@ class VJudge:
                 )
                 element.click()
 
-                logger.info(f"Solution for {problem_link} submitted.")
+                logger.info("Solution for %s submitted.", problem_link)
 
                 start = time.time()
 
@@ -303,7 +303,9 @@ class VJudge:
                     ):  # we must be actually verified
                         break
                     logger.info(
-                        f"Checking submission {checked_times} times for {problem_link} ."
+                        "Checking submission %d times for %s .",
+                        checked_times,
+                        problem_link,
                     )
                     try:
                         text = (
@@ -323,11 +325,11 @@ class VJudge:
                         text = ""
                     text = text.split(" ")[0]
                     if self.check(text, self.GOOD_VERDICTS):
-                        logger.info("{problem_link} was successful.")
+                        logger.info("%s was successful.", problem_link)
                         driver.quit()
                         return True
                     elif self.check(text, self.BAD_VERDICTS):
-                        logger.info("{problem_link} failed.")
+                        logger.info("%s failed.", problem_link)
                         driver.quit()
                         return False
 
@@ -335,7 +337,8 @@ class VJudge:
                     checked_times += 1
                     if time.time() - start >= 120:
                         break
-            except:
+            except Exception as e:
+                logger.info("Failed check of status: %s", e)
                 retries += 1
                 driver.refresh()
         driver.quit()

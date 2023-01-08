@@ -16,12 +16,9 @@ import onlinejudge_verify.marker
 from onlinejudge_verify.online_submission.judges import *
 from onlinejudge_verify.online_submission.submissions import *
 
-import onlinejudge_verify.languages.cplusplus_bundle as cplusplus_bundle
-from onlinejudge_verify.languages.cplusplus_bundle import BundleError
-
 logger = getLogger(__name__)
 
-vjudge = VJudge("", "")
+VJUDGE = VJudge("", "")
 
 
 class VerificationSummary:
@@ -58,11 +55,11 @@ def exec_command(command: List[str]):
 
 
 def initialize_judges():
-    global vjudge
+    global VJUDGE
     if os.environ.get("OJ_USERNAME") and os.environ.get("OJ_PASSWORD"):
         username = os.environ.get("OJ_USERNAME")
         password = os.environ.get("OJ_PASSWORD")
-        vjudge = VJudge(username, password)
+        VJUDGE = VJudge(username, password)
     else:
         logger.warning("The online judge account does not exist.")
 
@@ -70,7 +67,7 @@ def initialize_judges():
 def verify_file(
     path: pathlib.Path, *, compilers: List[str], tle: float, jobs: int
 ) -> Optional[bool]:
-    global vjudge
+    global VJUDGE
     logger.info("verify: %s", path)
 
     language = onlinejudge_verify.languages.list.get(path)
@@ -111,14 +108,14 @@ def verify_file(
     #             problem = Problem('codeforces', lst[-2] + lst[-1])
     #         return judge.submit_solution(problem, solution)
 
-    link = vjudge.get_vjudge_problem_link(url)
-    if link != None:
+    link = VJUDGE.get_vjudge_problem_link(url)
+    if link is not None:
         basedir = pathlib.Path.cwd()
         code = language.bundle(
             path, basedir=basedir, options={"include_paths": [basedir]}
         ).decode()
         solution = Solution("C++", code)
-        return vjudge.submit_solution(url, solution)
+        return VJUDGE.submit_solution(url, solution)
 
     problem = onlinejudge.dispatch.problem_from_url(url)
 
